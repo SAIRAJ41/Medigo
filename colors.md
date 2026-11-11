@@ -16,7 +16,7 @@
 ### Severity colors (separate from the brand palette)
 Severity colors must never be reused for decoration, and the brand blue must never be used for a severity badge.
 
-| Category | Solid | Tint (badge background) | Text on solid |
+| Category | Solid | Tint (badge background) | Tex t on solid |
 |---|---|---|---|
 | Red | #C62828 | #FDECEA | White |
 | Yellow | #F9A825 | #FFF4D6 | #263746 (dark, not white) |
