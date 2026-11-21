@@ -1,67 +1,55 @@
+import { useEffect, useState } from 'react';
 import type { SeverityColor } from '../../types/SeverityColor';
+import { Icon } from '../common/Icon';
 
-const R = 44;
-const C = 2 * Math.PI * R;
-
-// Chart colours come only from the three severity tokens.
-const SEGMENTS: { color: SeverityColor; label: string; stroke: string; dot: string }[] = [
-  { color: 'GREEN', label: 'Green', stroke: 'stroke-severity-green', dot: 'bg-severity-green' },
-  { color: 'YELLOW', label: 'Yellow', stroke: 'stroke-severity-yellow', dot: 'bg-severity-yellow' },
-  { color: 'RED', label: 'Red', stroke: 'stroke-severity-red', dot: 'bg-severity-red' },
+// Bar colours come only from the three severity tokens. Icon + label carry the meaning, never colour alone.
+// The yellow icon uses the text colour: severity yellow on white is below 3:1.
+const ROWS: { color: SeverityColor; label: string; icon: string; iconClass: string; bar: string }[] = [
+  { color: 'RED', label: 'Red', icon: 'error', iconClass: 'text-severity-red', bar: 'bg-severity-red' },
+  { color: 'YELLOW', label: 'Yellow', icon: 'warning', iconClass: 'text-content', bar: 'bg-severity-yellow' },
+  { color: 'GREEN', label: 'Green', icon: 'check_circle', iconClass: 'text-severity-green', bar: 'bg-severity-green' },
 ];
 
-/** Donut chart with a legend that shows counts and percentages. */
+const checks = (n: number) => `${n} ${n === 1 ? 'check' : 'checks'}`;
+
+/**
+ * Severity breakdown as three horizontal bars (Red, Yellow, Green) with count and percentage.
+ * The name is kept from the earlier donut chart so callers do not change.
+ */
 export function SeverityPieChart({ counts }: { counts: Record<SeverityColor, number> }) {
   const total = counts.RED + counts.YELLOW + counts.GREEN;
-  let offset = 0;
+
+  // Bars grow from 0 after the first paint (300 ms). The transition is off under prefers-reduced-motion.
+  const [grown, setGrown] = useState(false);
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setGrown(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  const summary = `Severity breakdown of ${checks(total)}: Red ${counts.RED}, Yellow ${counts.YELLOW}, Green ${counts.GREEN}.`;
 
   return (
-    <div className="flex flex-col items-center gap-6 sm:flex-row lg:flex-col xl:flex-row">
-      <svg viewBox="0 0 120 120" className="h-40 w-40 shrink-0 -rotate-90" role="img" aria-label="Severity breakdown chart">
-        <circle cx="60" cy="60" r={R} fill="none" strokeWidth="16" className="stroke-border" />
-        {SEGMENTS.map((s) => {
-          const len = total ? (counts[s.color] / total) * C : 0;
-          const el = (
-            <circle
-              key={s.color}
-              cx="60"
-              cy="60"
-              r={R}
-              fill="none"
-              strokeWidth="16"
-              className={s.stroke}
-              strokeDasharray={`${len} ${C - len}`}
-              strokeDashoffset={-offset}
-            />
-          );
-          offset += len;
-          return el;
-        })}
-        <g className="rotate-90 origin-center">
-          <text x="60" y="58" textAnchor="middle" className="fill-content text-[22px] font-bold">
-            {total}
-          </text>
-          <text x="60" y="74" textAnchor="middle" className="fill-content-muted text-[9px]">
-            Evaluated
-          </text>
-        </g>
-      </svg>
-      <ul className="w-full space-y-3 text-sm">
-        {SEGMENTS.map((s) => {
-          const n = counts[s.color];
-          const pct = total ? Math.round((n / total) * 100) : 0;
-          return (
-            <li key={s.color} className="flex h-8 items-center gap-2">
-              <span className={`h-3 w-3 shrink-0 rounded-full ${s.dot}`} />
-              <span className="font-medium text-content">{s.label}</span>
-              <span className="ml-auto whitespace-nowrap text-content-muted">
-                {n} {n === 1 ? 'check' : 'checks'}
-              </span>
-              <span className="inline-flex h-6 w-12 items-center justify-center rounded-lg bg-surface-tint text-xs font-semibold leading-none text-content">{pct}%</span>
-            </li>
-          );
-        })}
-      </ul>
+    <div role="img" aria-label={summary} className="flex flex-1 flex-col justify-evenly gap-4">
+      {ROWS.map((r) => {
+        const n = counts[r.color];
+        const pct = total ? (n / total) * 100 : 0;
+        return (
+          <div key={r.color} className="grid grid-cols-[6rem_minmax(0,1fr)_5rem_3rem] items-center gap-4 text-sm">
+            <span className="flex items-center gap-2 font-semibold text-content">
+              <Icon name={r.icon} className={`!text-xl ${r.iconClass}`} />
+              {r.label}
+            </span>
+            <span className="h-3 overflow-hidden rounded-full bg-border">
+              <span
+                className={`block h-full rounded-full transition-[width] duration-300 ease-out motion-reduce:transition-none ${r.bar}`}
+                style={{ width: grown ? `${pct}%` : '0%', minWidth: n > 0 ? 4 : 0 }}
+              />
+            </span>
+            <span className="text-right tabular-nums text-content">{checks(n)}</span>
+            <span className="text-right font-semibold tabular-nums text-content">{Math.round(pct)}%</span>
+          </div>
+        );
+      })}
     </div>
   );
 }

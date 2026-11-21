@@ -100,7 +100,7 @@ export function DashboardScreen({ onStartCheck }: { onStartCheck: () => void }) 
         <EmptyProfileState onStart={onStartCheck} />
       ) : (
         <div className="grid gap-6 lg:grid-cols-5">
-          <section className="min-w-0 rounded-xl border border-border bg-surface p-6 lg:col-span-2">
+          <section className="flex min-w-0 flex-col rounded-xl border border-border bg-surface p-6 lg:col-span-2">
             <h2 className="text-lg font-bold leading-7 text-content">Severity Overview</h2>
             <p className="mb-6 mt-1 text-sm leading-5 text-content-muted">Breakdown across {stats.totalChecks} saved checks</p>
             <SeverityPieChart counts={stats.severityCounts} />
