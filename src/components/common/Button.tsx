@@ -3,10 +3,14 @@ import { Icon } from './Icon';
 
 type Variant = 'primary' | 'secondary' | 'outline';
 
+// Disabled states swap to readable token pairs instead of fading with opacity.
 const STYLES: Record<Variant, string> = {
-  primary: 'bg-primary text-white hover:bg-primary-hover active:bg-primary-hover',
-  secondary: 'bg-surface-tint text-primary hover:bg-accent',
-  outline: 'bg-surface text-content border border-border hover:bg-surface-tint',
+  primary:
+    'border border-primary bg-primary text-surface hover:border-primary-hover hover:bg-primary-hover active:bg-primary-hover disabled:border-border disabled:bg-surface-tint disabled:text-content-muted',
+  secondary:
+    'border border-surface-tint bg-surface-tint text-primary-hover hover:border-accent hover:bg-accent active:bg-accent disabled:text-content-muted',
+  outline:
+    'border border-content-muted bg-surface text-content hover:bg-surface-tint active:bg-accent disabled:border-border disabled:bg-surface-tint disabled:text-content-muted',
 };
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -20,7 +24,7 @@ export function Button({ variant = 'primary', icon, children, className = '', ..
   return (
     <button
       {...rest}
-      className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${STYLES[variant]} ${className}`}
+      className={`inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 text-sm font-semibold leading-none disabled:cursor-not-allowed ${STYLES[variant]} ${className}`}
     >
       {icon && <Icon name={icon} className="!text-xl" />}
       {children}

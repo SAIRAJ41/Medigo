@@ -44,47 +44,58 @@ export function MapScreen() {
 
   const nearestId = position && facilities.length ? facilities[0].hospitalId : null;
 
-  if (!all) return <div className="p-10 text-center text-content-muted">Loading…</div>;
+  if (!all) return <MapSkeleton />;
 
   if (all.length === 0) {
     return (
-      <div className="mx-auto max-w-[1200px] p-6">
-        <div className="rounded-xl border border-border bg-surface-tint p-10 text-center text-content">
-          <Icon name="local_hospital" className="text-primary" />
-          <p className="mt-2 font-semibold">No facility data is stored on this device yet.</p>
-          <p className="text-sm text-content-muted">Call 112 in an emergency.</p>
+      <div className="mx-auto max-w-[1200px] px-4 py-8 md:px-6">
+        <div className="rounded-xl border border-border bg-surface p-10 text-center text-content">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-surface-tint">
+            <Icon name="local_hospital" className="text-primary-hover" />
+          </div>
+          <p className="font-semibold">No facility data is stored on this device yet.</p>
+          <p className="mt-1 text-sm text-content-muted">Call 112 in an emergency.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] space-y-4 px-4 py-6 md:px-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="mx-auto w-full max-w-[1200px] space-y-6 px-4 py-8 md:px-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
         <div>
-          <h1 className="text-2xl font-bold text-content">Nearest Facility</h1>
-          <p className="text-sm text-content-muted">Medical centres near you</p>
+          <h1 className="text-2xl font-bold leading-8 text-content">Nearest Facility</h1>
+          <p className="mt-1 text-sm leading-5 text-content-muted">Medical centres near you</p>
         </div>
-        {state === 'locating' && <span className="text-sm text-content-muted">Finding your location…</span>}
+        {state === 'locating' && (
+          <span className="inline-flex h-8 items-center gap-2 rounded-full bg-surface-tint px-3 text-xs font-semibold leading-none text-content" role="status">
+            <Icon name="location_searching" className="!text-base pulse-dot" />
+            Finding your location…
+          </span>
+        )}
         {state === 'found' && (
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-xs font-medium text-content">
-            <Icon name="my_location" className="!text-base" /> Location found
+          <span className="inline-flex h-8 items-center gap-2 rounded-full bg-accent px-3 text-xs font-semibold leading-none text-content">
+            <Icon name="my_location" className="!text-base" />
+            Location found
           </span>
         )}
       </div>
 
       {(state === 'denied' || state === 'failed') && (
-        <div role="status" className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-accent p-3 text-sm text-content">
-          <Icon name="location_off" className="!text-xl" />
-          <span className="flex-1">
-            {state === 'denied' ? 'Location permission was denied.' : 'Location is not available.'} Showing all facilities without distances.
+        <div role="status" className="flex flex-wrap items-center gap-3 rounded-xl bg-accent p-4 text-sm leading-5 text-content">
+          <span className="flex min-w-0 flex-1 items-center gap-2">
+            <Icon name="location_off" className="!text-xl" />
+            <span>
+              {state === 'denied' ? 'Location permission was denied.' : 'Location is not available.'} Showing all facilities without distances.
+            </span>
           </span>
-          <Button variant="outline" onClick={locate} className="!py-1.5">Try again</Button>
+          <Button variant="outline" icon="refresh" onClick={locate}>Try again</Button>
         </div>
       )}
 
       <div className="grid gap-6 lg:grid-cols-5">
-        <div className="h-[420px] lg:col-span-3 lg:h-[600px]">
+        {/* Map and list panels share one fixed height on desktop. */}
+        <div className="h-[420px] min-w-0 lg:col-span-3 lg:h-[600px]">
           <FacilityMap
             facilities={facilities}
             nearestId={nearestId}
@@ -95,12 +106,32 @@ export function MapScreen() {
             onSelect={setSelectedId}
           />
         </div>
-        <div className="lg:col-span-2 lg:max-h-[600px] lg:overflow-y-auto lg:pr-1">
+        <div className="min-w-0 lg:col-span-2 lg:h-[600px] lg:overflow-y-auto lg:pr-2">
           <FacilityList facilities={facilities} hasPosition={!!position} nearestId={nearestId} selectedId={selectedId} onSelect={setSelectedId} />
         </div>
       </div>
 
       <EmergencyNotice />
+    </div>
+  );
+}
+
+/** Placeholder blocks that match the map layout while facilities load. */
+function MapSkeleton() {
+  return (
+    <div className="mx-auto w-full max-w-[1200px] space-y-6 px-4 py-8 md:px-6" aria-busy="true" aria-label="Loading facilities">
+      <div className="space-y-2 border-b border-border pb-4">
+        <div className="skeleton h-8 w-56" />
+        <div className="skeleton h-5 w-48" />
+      </div>
+      <div className="grid gap-6 lg:grid-cols-5">
+        <div className="skeleton h-[420px] !rounded-xl lg:col-span-3 lg:h-[600px]" />
+        <div className="space-y-3 lg:col-span-2">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="skeleton h-[136px] !rounded-xl" />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

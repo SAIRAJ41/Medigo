@@ -3,6 +3,7 @@ import type { TriageOutcome } from '../../services/TriageService';
 import { Button } from '../common/Button';
 import { Icon } from '../common/Icon';
 import { SeverityBadge } from '../common/SeverityBadge';
+import { showToast } from '../common/Toast';
 import { EscalationCard } from './EscalationCard';
 
 interface Props {
@@ -10,6 +11,8 @@ interface Props {
   onFindFacility: () => void;
   onSave: () => Promise<void>;
 }
+
+const NOTICE = 'flex items-start gap-2 rounded-xl bg-accent p-4 text-sm leading-5 text-content';
 
 /** Assistant reply: badge, condition, numbered steps, two actions, disclaimer. */
 export function TriageResultCard({ outcome, onFindFacility, onSave }: Props) {
@@ -20,41 +23,50 @@ export function TriageResultCard({ outcome, onFindFacility, onSave }: Props) {
   const save = async () => {
     await onSave();
     setSaved(true);
+    showToast('Saved to history');
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {status === 'OFFLINE' && (
-        <div className="flex items-start gap-2 rounded-xl border border-border bg-accent p-3 text-sm text-content">
+        <div className={NOTICE}>
           <Icon name="cloud_off" className="!text-xl" />
           <span>You are offline, so AI analysis is not available. These are the closest saved first-aid steps.</span>
         </div>
       )}
       {status === 'FALLBACK' && (
-        <div className="flex items-start gap-2 rounded-xl border border-border bg-accent p-3 text-sm text-content">
+        <div className={NOTICE}>
           <Icon name="info" className="!text-xl" />
           <span>We could not analyse this reliably, so here is the safe default advice.</span>
         </div>
       )}
       {critical && <EscalationCard />}
 
-      <article className="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+      <article className="rounded-xl border border-border bg-surface p-6 shadow-sm">
         <div className="flex flex-wrap items-center gap-3">
           <SeverityBadge color={result.severityColor} level={result.severityLevel} />
-          <h3 className="text-lg font-bold text-content">{result.condition}</h3>
+          <h3 className="text-lg font-bold leading-6 text-content">{result.condition}</h3>
         </div>
 
-        <h4 className="mt-4 text-sm font-semibold text-content">First-aid steps</h4>
-        <ol className="mt-2 space-y-2.5">
-          {result.steps.map((s, i) => (
-            <li key={i} className="flex gap-3 text-sm text-content">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">{i + 1}</span>
-              <span className="pt-0.5">{s}</span>
-            </li>
-          ))}
-        </ol>
+        <div className="mt-4 rounded-xl border border-border bg-page p-4">
+          <h4 className="flex items-center gap-2 text-sm font-semibold leading-5 text-content">
+            <Icon name="medical_services" className="!text-xl text-primary-hover" />
+            First-aid steps
+          </h4>
+          {/* 24 px circles share the 24 px line height, so each number sits on the first line of its step. */}
+          <ol className="mt-3 space-y-3">
+            {result.steps.map((s, i) => (
+              <li key={i} className="flex items-start gap-3 text-sm leading-6 text-content">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold leading-none text-surface">
+                  {i + 1}
+                </span>
+                <span className="min-w-0">{s}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
 
-        <div className="mt-5 flex flex-wrap gap-3">
+        <div className="mt-6 flex flex-wrap gap-3">
           <Button icon="local_hospital" onClick={onFindFacility}>
             Find Nearest Facility
           </Button>
@@ -63,7 +75,7 @@ export function TriageResultCard({ outcome, onFindFacility, onSave }: Props) {
           </Button>
         </div>
 
-        <p className="mt-4 text-xs text-content-muted">
+        <p className="mt-6 border-t border-border pt-4 text-xs leading-5 text-content-muted">
           This is guidance only, not a substitute for a doctor or emergency care.
         </p>
       </article>

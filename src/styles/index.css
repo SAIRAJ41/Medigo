@@ -54,3 +54,52 @@ body {
   box-shadow: 0 0 0 6px var(--color-accent);
 }
 .leaflet-container { font-family: 'Inter', system-ui, sans-serif; }
+
+/* ---------- Polish layer: one source for focus, motion and loading states ---------- */
+
+/* Icons never shrink inside flex rows and sit on the text centerline */
+.material-symbols-outlined { flex-shrink: 0; vertical-align: middle; line-height: 1 !important; }
+
+/* Visible keyboard focus everywhere (primary-hover passes 3:1 on white, tint and bg) */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-primary-hover);
+  outline-offset: 2px;
+}
+
+/* 150 ms hover and pressed feedback on every interactive element */
+:where(a, button) {
+  transition-property: background-color, border-color, color, box-shadow, transform;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+:where(a, button):not(:disabled):active { transform: translateY(1px); }
+
+/* Scrim behind the drawer and dialog, built from the text token */
+.scrim { background: color-mix(in srgb, var(--color-text) 40%, transparent); }
+
+/* Skeleton placeholders used instead of "Loading..." text */
+@keyframes skeleton-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+.skeleton {
+  background: var(--color-bg-tint);
+  border-radius: 8px;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+/* Toast entrance */
+@keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+.toast-in { animation: toast-in 150ms ease-out; }
+
+/* Leaflet zoom control matches the app's focus and radius scale */
+.leaflet-bar { border-radius: 8px; }
+.leaflet-container a:focus-visible { outline: 2px solid var(--color-primary-hover); outline-offset: 2px; }
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  :where(a, button):not(:disabled):active { transform: none; }
+}

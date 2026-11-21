@@ -16,7 +16,7 @@ export function SeverityPieChart({ counts }: { counts: Record<SeverityColor, num
   let offset = 0;
 
   return (
-    <div className="flex flex-col items-center gap-6 sm:flex-row">
+    <div className="flex flex-col items-center gap-6 sm:flex-row lg:flex-col xl:flex-row">
       <svg viewBox="0 0 120 120" className="h-40 w-40 shrink-0 -rotate-90" role="img" aria-label="Severity breakdown chart">
         <circle cx="60" cy="60" r={R} fill="none" strokeWidth="16" className="stroke-border" />
         {SEGMENTS.map((s) => {
@@ -46,18 +46,18 @@ export function SeverityPieChart({ counts }: { counts: Record<SeverityColor, num
           </text>
         </g>
       </svg>
-      <ul className="w-full space-y-2.5 text-sm">
+      <ul className="w-full space-y-3 text-sm">
         {SEGMENTS.map((s) => {
           const n = counts[s.color];
           const pct = total ? Math.round((n / total) * 100) : 0;
           return (
-            <li key={s.color} className="flex items-center gap-2">
-              <span className={`h-3 w-3 rounded-full ${s.dot}`} />
+            <li key={s.color} className="flex h-8 items-center gap-2">
+              <span className={`h-3 w-3 shrink-0 rounded-full ${s.dot}`} />
               <span className="font-medium text-content">{s.label}</span>
-              <span className="ml-auto text-content-muted">
+              <span className="ml-auto whitespace-nowrap text-content-muted">
                 {n} {n === 1 ? 'check' : 'checks'}
               </span>
-              <span className="w-12 rounded-md bg-surface-tint px-1.5 py-0.5 text-center text-xs font-semibold text-content">{pct}%</span>
+              <span className="inline-flex h-6 w-12 items-center justify-center rounded-lg bg-surface-tint text-xs font-semibold leading-none text-content">{pct}%</span>
             </li>
           );
         })}

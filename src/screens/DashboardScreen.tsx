@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '../components/common/Button';
+import { showToast } from '../components/common/Toast';
 import { CaseDialog } from '../components/dashboard/CaseDialog';
 import { EmptyProfileState } from '../components/dashboard/EmptyProfileState';
 import { RecentChecksList } from '../components/dashboard/RecentChecksList';
@@ -44,28 +45,29 @@ export function DashboardScreen({ onStartCheck }: { onStartCheck: () => void }) 
   const deleteCase = async (id: number) => {
     await cases.delete(id);
     setOpen(null);
+    showToast('Deleted');
     await load();
   };
 
-  if (!stats) return <div className="p-10 text-center text-content-muted">Loading…</div>;
+  if (!stats) return <DashboardSkeleton />;
   const empty = stats.totalChecks === 0;
   const usingDemoPosition = !location.lastKnown() && IS_DEMO_MODE;
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] space-y-6 px-4 py-6 md:px-6">
+    <div className="mx-auto w-full max-w-[1200px] space-y-8 px-4 py-8 md:px-6">
       {/* Greeting row */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold text-content">Hello</h1>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-accent px-2.5 py-1 text-xs font-medium text-content">
-              <span className="h-2 w-2 rounded-full bg-primary" />
+            <h1 className="text-3xl font-bold leading-10 text-content">Hello</h1>
+            <span className="inline-flex h-8 items-center gap-2 rounded-full bg-accent px-3 text-xs font-semibold leading-none text-content">
+              <span className="h-2 w-2 shrink-0 rounded-full bg-primary-hover" />
               Triage Ready
             </span>
           </div>
-          <p className="mt-1 text-sm text-content-muted">How are you feeling today?</p>
+          <p className="mt-1 text-sm leading-5 text-content-muted">How are you feeling today?</p>
         </div>
-        <Button icon="add" onClick={onStartCheck} className="px-6 py-3">
+        <Button icon="add" onClick={onStartCheck} className="px-6">
           Start a New Check
         </Button>
       </div>
@@ -95,13 +97,14 @@ export function DashboardScreen({ onStartCheck }: { onStartCheck: () => void }) 
         <EmptyProfileState onStart={onStartCheck} />
       ) : (
         <div className="grid gap-6 lg:grid-cols-5">
-          <section className="min-w-0 rounded-xl border border-border bg-surface p-5 lg:col-span-2">
-            <h2 className="text-lg font-bold text-content">Severity Overview</h2>
-            <p className="mb-4 text-xs text-content-muted">Breakdown across {stats.totalChecks} saved checks</p>
+          <section className="min-w-0 rounded-xl border border-border bg-surface p-6 lg:col-span-2">
+            <h2 className="text-lg font-bold leading-7 text-content">Severity Overview</h2>
+            <p className="mb-6 mt-1 text-sm leading-5 text-content-muted">Breakdown across {stats.totalChecks} saved checks</p>
             <SeverityPieChart counts={stats.severityCounts} />
           </section>
-          <section className="min-w-0 rounded-xl border border-border bg-surface p-5 lg:col-span-3">
-            <h2 className="mb-2 text-lg font-bold text-content">Recent Checks</h2>
+          <section className="min-w-0 rounded-xl border border-border bg-surface p-6 lg:col-span-3">
+            <h2 className="text-lg font-bold leading-7 text-content">Recent Checks</h2>
+            <p className="mb-4 mt-1 text-sm leading-5 text-content-muted">Your last {recent.length} saved checks</p>
             <RecentChecksList cases={recent} onOpen={openCase} />
           </section>
         </div>
@@ -116,9 +119,33 @@ function SeverityDot({ color }: { color: 'RED' | 'YELLOW' | 'GREEN' }) {
   const label = { RED: 'Red', YELLOW: 'Yellow', GREEN: 'Green' }[color];
   const dot = { RED: 'bg-severity-red', YELLOW: 'bg-severity-yellow', GREEN: 'bg-severity-green' }[color];
   return (
-    <span className="inline-flex items-center gap-1.5">
-      <span className={`h-2 w-2 rounded-full ${dot}`} />
+    <span className="inline-flex items-center gap-2">
+      <span className={`h-2 w-2 shrink-0 rounded-full ${dot}`} />
       {label} result
     </span>
+  );
+}
+
+/** Placeholder blocks that match the real layout while data loads. */
+function DashboardSkeleton() {
+  return (
+    <div className="mx-auto w-full max-w-[1200px] space-y-8 px-4 py-8 md:px-6" aria-busy="true" aria-label="Loading dashboard">
+      <div className="flex items-center justify-between gap-4">
+        <div className="space-y-2">
+          <div className="skeleton h-10 w-48" />
+          <div className="skeleton h-5 w-64" />
+        </div>
+        <div className="skeleton h-10 w-48" />
+      </div>
+      <div className="grid gap-4 md:grid-cols-3">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="skeleton h-[132px] !rounded-xl" />
+        ))}
+      </div>
+      <div className="grid gap-6 lg:grid-cols-5">
+        <div className="skeleton h-80 !rounded-xl lg:col-span-2" />
+        <div className="skeleton h-80 !rounded-xl lg:col-span-3" />
+      </div>
+    </div>
   );
 }

@@ -57,8 +57,13 @@ export function FacilityMap({ facilities, nearestId, selectedId, user, tileUrl, 
   useEffect(() => {
     const m = map.current;
     const f = facilities.find((x) => x.hospitalId === selectedId);
-    if (m && f) m.flyTo([f.latitude, f.longitude], Math.max(m.getZoom(), 12), { duration: 0.6 });
+    if (!m || !f) return;
+    const target: L.LatLngExpression = [f.latitude, f.longitude];
+    const zoom = Math.max(m.getZoom(), 12);
+    // Jump instead of flying when the user prefers reduced motion.
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) m.setView(target, zoom, { animate: false });
+    else m.flyTo(target, zoom, { duration: 0.6 });
   }, [selectedId, facilities]);
 
-  return <div ref={el} className="h-full min-h-[320px] w-full rounded-xl border border-border" role="region" aria-label="Facility map" />;
+  return <div ref={el} className="h-full min-h-[320px] w-full overflow-hidden rounded-xl border border-border" role="region" aria-label="Facility map" />;
 }

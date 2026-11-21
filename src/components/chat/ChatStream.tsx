@@ -13,10 +13,13 @@ interface Props {
   onSave: (outcome: TriageOutcome) => Promise<void>;
 }
 
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
 export function ChatStream({ messages, onFindFacility, onSave }: Props) {
   const endRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    endRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'end' });
   }, [messages]);
 
   return (
@@ -25,7 +28,7 @@ export function ChatStream({ messages, onFindFacility, onSave }: Props) {
         if (m.role === 'user') {
           return (
             <div key={m.id} className="flex justify-end">
-              <div className="max-w-[85%] rounded-2xl rounded-br-sm bg-accent p-3 text-sm text-content">
+              <div className="max-w-[80%] rounded-xl rounded-br-sm bg-accent p-4 text-sm leading-6 text-content">
                 {m.image && <img src={m.image} alt="Attached" className="mb-2 h-28 w-28 rounded-lg object-cover" />}
                 {m.text && <p>{m.text}</p>}
               </div>
@@ -34,13 +37,17 @@ export function ChatStream({ messages, onFindFacility, onSave }: Props) {
         }
         if (m.role === 'loading') {
           return (
-            <div key={m.id} className="inline-flex items-center gap-2 rounded-2xl rounded-bl-sm bg-surface-tint px-4 py-3 text-sm text-content-muted" role="status">
-              Analyzing
-              <span className="flex gap-1">
+            <div
+              key={m.id}
+              className="inline-flex h-10 items-center gap-2 rounded-xl rounded-bl-sm bg-surface-tint px-4 text-sm text-content"
+              role="status"
+            >
+              <span className="flex items-center gap-1" aria-hidden="true">
                 {[0, 1, 2].map((i) => (
-                  <span key={i} className="pulse-dot h-1.5 w-1.5 rounded-full bg-primary" style={{ animationDelay: `${i * 0.2}s` }} />
+                  <span key={i} className="pulse-dot h-2 w-2 rounded-full bg-primary-hover" style={{ animationDelay: `${i * 0.2}s` }} />
                 ))}
               </span>
+              Analyzing
             </div>
           );
         }

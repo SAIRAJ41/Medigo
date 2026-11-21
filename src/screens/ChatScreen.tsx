@@ -81,27 +81,38 @@ export function ChatScreen({ onFindFacility }: { onFindFacility: () => void }) {
   };
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-56px-45px)] w-full max-w-[800px] flex-col">
+    // 64 px top bar + 48 px footer. Every child shares the same 800 px column and 16 px inset.
+    <div className="mx-auto flex h-[calc(100vh-112px)] w-full max-w-[800px] flex-col">
       {!online && (
-        <div className="mx-4 mt-3 flex items-start gap-2 rounded-xl border border-border bg-accent p-3 text-sm text-content" role="status">
+        <div className="mx-4 mt-4 flex items-start gap-2 rounded-xl bg-accent p-4 text-sm leading-5 text-content" role="status">
           <Icon name="cloud_off" className="!text-xl" />
           <span>You are offline. AI replies need internet. Saved first-aid guidance is still available.</span>
         </div>
       )}
 
-      <div className="flex-1 space-y-4 overflow-y-auto px-4 py-5">
-        <h1 className="text-2xl font-bold text-content">New Check</h1>
-        <div className="max-w-[90%] rounded-2xl rounded-bl-sm bg-surface-tint p-4 text-sm text-content">
-          <div className="mb-1 text-xs font-semibold text-primary">MediGo Assistant</div>
-          Describe the injury or symptoms. You can type, speak or add a photo.
+      <div className="flex-1 space-y-6 overflow-y-auto px-4 py-6">
+        <div className="border-b border-border pb-4">
+          <h1 className="text-2xl font-bold leading-8 text-content">New Check</h1>
+          <p className="mt-1 text-sm text-content-muted">Describe what happened to get first-aid steps.</p>
         </div>
-        {messages.length === 0 && <SymptomChips onPick={setText} />}
+        <div className="flex items-start gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-surface" aria-hidden="true">
+            <Icon name="add_circle" className="!text-xl" />
+          </span>
+          <div className="min-w-0 space-y-3">
+            <div className="flex h-10 items-center text-sm font-semibold text-content">MediGo Assistant</div>
+            <div className="rounded-xl rounded-tl-sm bg-surface-tint p-4 text-sm leading-6 text-content">
+              Describe the injury or symptoms. You can type, speak or add a photo.
+            </div>
+            {messages.length === 0 && <SymptomChips onPick={setText} />}
+          </div>
+        </div>
         <ChatStream messages={messages} onFindFacility={onFindFacility} onSave={save} />
       </div>
 
       {notice && (
-        <p className="mx-4 mb-2 flex items-center gap-2 rounded-lg bg-surface-tint px-3 py-2 text-sm text-content" role="status">
-          <Icon name="info" className="!text-lg" />
+        <p className="mx-4 mb-2 flex items-start gap-2 rounded-lg bg-surface-tint p-3 text-sm leading-5 text-content" role="status">
+          <Icon name="info" className="!text-xl" />
           {notice}
         </p>
       )}

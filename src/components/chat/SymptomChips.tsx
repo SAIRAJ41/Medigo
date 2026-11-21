@@ -8,9 +8,13 @@ const CHIPS = [
 export function SymptomChips({ onPick }: { onPick: (text: string) => void }) {
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-xs font-medium text-content-muted">Common:</span>
+      <span className="mr-1 text-xs font-semibold text-content-muted">Common symptoms</span>
       {CHIPS.map((c) => (
-        <button key={c.label} onClick={() => onPick(c.text)} className="rounded-full bg-accent px-3.5 py-1.5 text-sm font-medium text-content hover:bg-primary hover:text-white">
+        <button
+          key={c.label}
+          onClick={() => onPick(c.text)}
+          className="inline-flex h-8 items-center rounded-full bg-accent px-4 text-sm font-medium leading-none text-content hover:bg-primary hover:text-surface active:bg-primary-hover active:text-surface"
+        >
           {c.label}
         </button>
       ))}

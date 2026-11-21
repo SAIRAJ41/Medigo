@@ -1,5 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Icon } from './Icon';
+import { useFocusTrap } from './useFocusTrap';
 
 export type ScreenName = 'dashboard' | 'chat' | 'map';
 
@@ -16,8 +17,11 @@ interface Props {
   onClose: () => void;
 }
 
-/** Slide-in menu from the left. Closes on backdrop click, Escape or after choosing. */
+/** Slide-in menu from the left. Closes on backdrop click, Escape or after choosing. Traps focus while open. */
 export function DrawerMenu({ open, current, onNavigate, onClose }: Props) {
+  const navRef = useRef<HTMLElement>(null);
+  useFocusTrap(open, navRef);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
@@ -26,28 +30,32 @@ export function DrawerMenu({ open, current, onNavigate, onClose }: Props) {
   }, [open, onClose]);
 
   return (
-    <div className={`fixed inset-0 z-40 ${open ? '' : 'pointer-events-none'}`} aria-hidden={!open}>
-      <div
-        onClick={onClose}
-        className={`absolute inset-0 bg-content/30 backdrop-blur-sm transition-opacity ${open ? 'opacity-100' : 'opacity-0'}`}
-      />
+    // `invisible` (after the 200 ms slide) keeps closed-menu links out of the Tab order.
+    <div
+      className={`fixed inset-0 z-40 transition-[visibility] duration-200 ${open ? 'visible' : 'pointer-events-none invisible'}`}
+      aria-hidden={!open}
+    >
+      <div onClick={onClose} className={`scrim absolute inset-0 transition-opacity duration-200 ${open ? 'opacity-100' : 'opacity-0'}`} />
       <nav
+        ref={navRef}
         aria-label="Main menu"
         className={`absolute left-0 top-0 flex h-full w-72 max-w-[85%] flex-col bg-surface shadow-xl transition-transform duration-200 ${open ? 'translate-x-0' : '-translate-x-full'}`}
       >
-        <div className="flex items-start justify-between border-b border-border p-4">
-          <div>
-            <div className="flex items-center gap-1.5 text-xl font-bold text-primary">
-              <Icon name="add_circle" className="!text-2xl" />
-              MediGo
-            </div>
-            <p className="mt-1 text-sm text-content-muted">First-aid guidance</p>
+        <div className="flex h-16 items-center justify-between border-b border-border px-4">
+          <div className="flex items-center gap-2 text-xl font-bold leading-none text-primary">
+            <Icon name="add_circle" className="!text-2xl" />
+            MediGo
           </div>
-          <button onClick={onClose} aria-label="Close menu" className="flex h-10 w-10 items-center justify-center rounded-lg hover:bg-surface-tint">
-            <Icon name="close" />
+          <button
+            onClick={onClose}
+            aria-label="Close menu"
+            className="flex h-10 w-10 items-center justify-center rounded-lg text-content hover:bg-surface-tint active:bg-accent"
+          >
+            <Icon name="close" className="!text-2xl" />
           </button>
         </div>
-        <ul className="flex-1 space-y-1 p-3">
+        <p className="px-4 pt-4 text-sm text-content-muted">First-aid guidance</p>
+        <ul className="flex-1 space-y-1 p-4">
           {ITEMS.map((item) => {
             const active = item.screen === current;
             return (
@@ -55,9 +63,11 @@ export function DrawerMenu({ open, current, onNavigate, onClose }: Props) {
                 <button
                   onClick={() => onNavigate(item.screen)}
                   aria-current={active ? 'page' : undefined}
-                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-semibold ${active ? 'bg-surface-tint text-primary' : 'text-content hover:bg-surface-tint'}`}
+                  className={`flex h-12 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-semibold ${
+                    active ? 'bg-surface-tint text-primary-hover' : 'text-content hover:bg-surface-tint active:bg-accent'
+                  }`}
                 >
-                  <Icon name={item.icon} />
+                  <Icon name={item.icon} className="!text-xl" />
                   {item.label}
                 </button>
               </li>
