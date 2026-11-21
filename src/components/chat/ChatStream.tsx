@@ -37,17 +37,16 @@ export function ChatStream({ messages, onFindFacility, onSave }: Props) {
         }
         if (m.role === 'loading') {
           return (
-            <div
-              key={m.id}
-              className="inline-flex h-10 items-center gap-2 rounded-xl rounded-bl-sm bg-surface-tint px-4 text-sm text-content"
-              role="status"
-            >
-              <span className="flex items-center gap-1" aria-hidden="true">
-                {[0, 1, 2].map((i) => (
-                  <span key={i} className="pulse-dot h-2 w-2 rounded-full bg-primary-hover" style={{ animationDelay: `${i * 0.2}s` }} />
-                ))}
+            <div key={m.id} className="inline-flex flex-col rounded-xl rounded-bl-sm bg-surface-tint px-4 py-2 text-sm text-content" role="status">
+              <span className="flex h-6 items-center gap-2">
+                <span className="flex items-center gap-1" aria-hidden="true">
+                  {[0, 1, 2].map((i) => (
+                    <span key={i} className="pulse-dot h-2 w-2 rounded-full bg-primary-hover" style={{ animationDelay: `${i * 0.2}s` }} />
+                  ))}
+                </span>
+                Analyzing
               </span>
-              Analyzing
+              <span className="leading-6">This can take up to a minute.</span>
             </div>
           );
         }

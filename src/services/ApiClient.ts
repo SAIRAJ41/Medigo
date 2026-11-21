@@ -43,7 +43,7 @@ async function toUploadDataUrl(src: string): Promise<string | null> {
 export class ApiClient implements IApiClient {
   constructor(
     private readonly baseUrl: string = (import.meta.env.VITE_API_URL as string | undefined) ?? '',
-    private readonly timeoutMs = 20000,
+    private readonly timeoutMs = 70000, // always longer than the server's 60 s model timeout
   ) {}
 
   isOnline(): boolean {

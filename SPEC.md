@@ -60,7 +60,7 @@ Rules:
 1. The user sends text, a photo, or voice (voice is transcribed to text first).
 2. The app searches the local knowledge base (EmergencyCard entries) and takes the top 3 matches as context. Works offline.
 3. The app POSTs `{text, image (optional), context}` to the proxy at `/triage`.
-4. The proxy builds ONE prompt text (role + rules + required JSON schema + up to 3 context entries + the user report inside delimiters; no system instruction or JSON mode, since Gemma may not support them), calls the model (20 s timeout), and validates the reply. Images reach the model only when `ENABLE_IMAGES=true`.
+4. The proxy builds ONE prompt text (role + rules + required JSON schema + up to 3 context entries + the user report inside delimiters; no system instruction or JSON mode, since Gemma may not support them), calls the model (60 s timeout, `MODEL_TIMEOUT_MS`; the app waits 70 s), and validates the reply. Images reach the model only when `ENABLE_IMAGES=true`.
 5. The model must return ONLY this JSON:
    `{"condition": string, "severityColor": "RED"|"YELLOW"|"GREEN", "severityLevel": "LOW"|"MEDIUM"|"HIGH", "steps": string[], "seekFacility": boolean}`
 6. If the reply is missing, malformed or fails validation, the proxy returns a safe fallback: RED / HIGH, steps telling the user to call emergency services (112 in India) or go to the nearest hospital.
