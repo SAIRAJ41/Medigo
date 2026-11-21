@@ -1,5 +1,10 @@
 node_modules
 dist
+*.log
+
+# Secrets: never commit real env files (root and server/)
 .env
 .env.*
-*.log
+.env.local
+server/.env
+!.env.example

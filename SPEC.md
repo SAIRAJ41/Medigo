@@ -60,7 +60,7 @@ Rules:
 1. The user sends text, a photo, or voice (voice is transcribed to text first).
 2. The app searches the local knowledge base (EmergencyCard entries) and takes the top 3 matches as context. Works offline.
 3. The app POSTs `{text, image (optional), context}` to the proxy at `/triage`.
-4. The proxy builds the prompt (fixed system prompt + required JSON schema + user input + context), calls the model, and validates the reply.
+4. The proxy builds ONE prompt text (role + rules + required JSON schema + up to 3 context entries + the user report inside delimiters; no system instruction or JSON mode, since Gemma may not support them), calls the model (20 s timeout), and validates the reply. Images reach the model only when `ENABLE_IMAGES=true`.
 5. The model must return ONLY this JSON:
    `{"condition": string, "severityColor": "RED"|"YELLOW"|"GREEN", "severityLevel": "LOW"|"MEDIUM"|"HIGH", "steps": string[], "seekFacility": boolean}`
 6. If the reply is missing, malformed or fails validation, the proxy returns a safe fallback: RED / HIGH, steps telling the user to call emergency services (112 in India) or go to the nearest hospital.
@@ -88,7 +88,8 @@ Seed data:
 - Data: CaseRepository, HospitalRepository, LocalDatabase, UserRepository (IUserRepository, LocalUserRepository), SessionStore (ISessionStore, LocalSessionStore)
 - Context: ServicesContext, AuthContext (useAuth)
 - Form components: components/forms (TextField, PasswordField, PasswordStrength, FormError, AuthCard, useFormState); components/common ConfirmDialog
-- Server: TriageController, PromptBuilder, ModelClient, ResponseValidator
+- Server (`server/`, Express + TypeScript, run with tsx): `src/index.ts`, `src/config.ts`, `src/controllers/TriageController.ts`, `src/services/PromptBuilder.ts`, `src/services/ModelClient.ts`, `src/services/ResponseValidator.ts`; `scripts/smoke-test.mjs`
+- Front-end flags (`src/config/env.ts`): `IS_DEMO_MODE` (mock storage, Demo data badge) and `USE_REAL_TRIAGE` (`VITE_USE_REAL_TRIAGE=true`: Chat uses the real ApiClient and proxy; otherwise MockApiClient)
 - Types: TriageQuery, TriageResult, Case, Hospital, EmergencyCard, DashboardStats, SeverityColor, SeverityLevel, InputType, User
 
 Rules:
@@ -122,6 +123,6 @@ Finish one phase, then STOP and wait for "next".
 Desktop app, video input, social features, fine-tuning, hardcoded per-severity responses.
 
 ## 12. Security
-- The API key and model ID live only in the server's `.env` file.
+- The API key and model ID live only in the server's `.env` file (`server/.env`, template `server/.env.example`). The server exits at startup if either is missing and never logs the key, the user's text or image, or the raw model output.
 - `.env` must be in `.gitignore` before the first commit.
 - The front end must never contain the API key.

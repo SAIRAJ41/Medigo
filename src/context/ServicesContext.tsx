@@ -1,11 +1,12 @@
 import { createContext, useContext, type ReactNode } from 'react';
-import { IS_DEMO_MODE } from '../config/env';
+import { IS_DEMO_MODE, USE_REAL_TRIAGE } from '../config/env';
 import type { ICaseRepository } from '../data/CaseRepository';
 import type { IHospitalRepository } from '../data/HospitalRepository';
 import { MockApiClient } from '../mock/MockApiClient';
 import { MockCaseRepository } from '../mock/MockCaseRepository';
 import { MockEmergencyCardRepository } from '../mock/MockEmergencyCardRepository';
 import { MockHospitalRepository } from '../mock/MockHospitalRepository';
+import { ApiClient, type IApiClient } from '../services/ApiClient';
 import { LocationService } from '../services/LocationService';
 import { OfflineMapService } from '../services/OfflineMapService';
 import { RagService } from '../services/RagService';
@@ -29,7 +30,9 @@ function createServices(): Services {
   const cases = new MockCaseRepository();
   const hospitals = new MockHospitalRepository();
   const rag = new RagService(new MockEmergencyCardRepository());
-  const triage = new TriageService(rag, new MockApiClient(), cases);
+  // Real AI replies through the proxy when VITE_USE_REAL_TRIAGE=true; storage stays mock either way.
+  const api: IApiClient = USE_REAL_TRIAGE ? new ApiClient() : new MockApiClient();
+  const triage = new TriageService(rag, api, cases);
   return { cases, hospitals, triage, voice: new VoiceService(), location: new LocationService(), map: new OfflineMapService() };
 }
 
