@@ -2,12 +2,13 @@ import { useEffect, useRef } from 'react';
 import { Icon } from './Icon';
 import { useFocusTrap } from './useFocusTrap';
 
-export type ScreenName = 'dashboard' | 'chat' | 'map';
+export type ScreenName = 'dashboard' | 'chat' | 'map' | 'profile' | 'login' | 'signup';
 
 const ITEMS: { screen: ScreenName; label: string; icon: string }[] = [
   { screen: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
   { screen: 'chat', label: 'New Check', icon: 'chat' },
   { screen: 'map', label: 'Nearest Facility', icon: 'local_hospital' },
+  { screen: 'profile', label: 'Profile', icon: 'person' },
 ];
 
 interface Props {
@@ -15,10 +16,12 @@ interface Props {
   current: ScreenName;
   onNavigate: (s: ScreenName) => void;
   onClose: () => void;
+  /** Shows a "Sign out" item at the bottom when given. */
+  onSignOut?: () => void;
 }
 
 /** Slide-in menu from the left. Closes on backdrop click, Escape or after choosing. Traps focus while open. */
-export function DrawerMenu({ open, current, onNavigate, onClose }: Props) {
+export function DrawerMenu({ open, current, onNavigate, onClose, onSignOut }: Props) {
   const navRef = useRef<HTMLElement>(null);
   useFocusTrap(open, navRef);
 
@@ -74,6 +77,17 @@ export function DrawerMenu({ open, current, onNavigate, onClose }: Props) {
             );
           })}
         </ul>
+        {onSignOut && (
+          <div className="border-t border-border p-4">
+            <button
+              onClick={onSignOut}
+              className="flex h-12 w-full items-center gap-3 rounded-lg px-3 text-left text-sm font-semibold text-content hover:bg-surface-tint active:bg-accent"
+            >
+              <Icon name="logout" className="!text-xl" />
+              Sign out
+            </button>
+          </div>
+        )}
         <p className="border-t border-border p-4 text-xs text-content-muted">Guidance only. Not a substitute for a doctor.</p>
       </nav>
     </div>

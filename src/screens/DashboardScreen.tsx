@@ -7,16 +7,19 @@ import { RecentChecksList } from '../components/dashboard/RecentChecksList';
 import { SeverityPieChart } from '../components/dashboard/SeverityPieChart';
 import { StatCard } from '../components/dashboard/StatCard';
 import { IS_DEMO_MODE } from '../config/env';
+import { useAuth } from '../context/AuthContext';
 import { useServices } from '../context/ServicesContext';
 import type { Case } from '../types/Case';
 import type { DashboardStats } from '../types/DashboardStats';
-import { formatDistance, formatWhen } from '../utils/format';
+import { firstName, formatDistance, formatWhen } from '../utils/format';
 
 // Demo only: a reference point in Panaji used until the user's real location is known.
 const DEMO_POSITION = { lat: 15.4909, lon: 73.8278 };
 
 export function DashboardScreen({ onStartCheck }: { onStartCheck: () => void }) {
   const { cases, hospitals, location } = useServices();
+  const { user } = useAuth();
+  const name = user ? firstName(user.fullName) : '';
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recent, setRecent] = useState<Case[]>([]);
   const [open, setOpen] = useState<Case | null>(null);
@@ -59,7 +62,7 @@ export function DashboardScreen({ onStartCheck }: { onStartCheck: () => void }) 
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold leading-10 text-content">Hello</h1>
+            <h1 className="text-3xl font-bold leading-10 text-content">{name ? `Hello, ${name}` : 'Hello'}</h1>
             <span className="inline-flex h-8 items-center gap-2 rounded-full bg-accent px-3 text-xs font-semibold leading-none text-content">
               <span className="h-2 w-2 shrink-0 rounded-full bg-primary-hover" />
               Triage Ready

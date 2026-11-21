@@ -11,12 +11,15 @@ AI first-aid triage assistant for rural India. Web app, also wrapped as an Andro
 - Map: Leaflet with OpenStreetMap tiles, with tile caching for offline use.
 - Desktop app: out of scope (on hold).
 
-## 2. Screens (exactly 3)
+## 2. Screens (exactly 6)
 1. **Dashboard**: greeting, stats row (total checks, last check, nearest facility), severity pie chart, 5 most recent cases.
 2. **Chat**: input bar with a + button (attach photo), a text field and a mic button. After a triage reply it shows a result card: severity badge, condition, numbered first-aid steps, and two buttons: "Find Nearest Facility" and "Save to History".
 3. **Map**: list of facilities plus map, nearest facility highlighted.
+4. **Login**: centered card, email and password (show/hide), "Sign in", link to Sign Up. No "Forgot password" (local accounts cannot be recovered); a note says accounts are stored on this device only. After 5 wrong attempts sign-in locks for 30 seconds with a visible countdown.
+5. **Sign Up**: full name, email, password (min 8 characters, live strength hint), confirm password. On success the user is signed in and taken to the Dashboard.
+6. **Profile**: avatar with initials, name and email; editable details (full name, phone, emergency contact name and phone; email read-only); change password; sign out; delete account with a confirmation dialog.
 
-Navigation: top-left three-line drawer menu. No bottom navigation bar. Back arrow on Chat and Map. No login or account screens.
+Navigation: top-left three-line drawer menu. No bottom navigation bar. Back arrow on Chat, Map and Profile. Local on-device accounts; server accounts later. Signed out, only Login and Sign Up are shown (top bar with wordmark, Demo badge and 112 chip, no menu). Signed in, the top bar has a round initials button that opens Profile, and the drawer has Profile and Sign out.
 
 ## 3. Severity system
 - Three categories: Red, Yellow, Green. Each has a level: Low, Medium, High. Total 9 tiers.
@@ -72,23 +75,27 @@ Rules:
 - `cases`: caseId, inputText, inputImagePath, severityColor, severityLevel, guidance, timestamp
 - `hospitals`: hospitalId, name, latitude, longitude, address
 - `emergency_cards`: cardId, conditionName, severityGuidance
+- `users` (localStorage for now, moves here later): userId, fullName, email, phone, emergencyContactName, emergencyContactPhone, createdAt, passwordSalt, passwordHash, passwordIterations
 
 Seed data:
 - `emergency_cards`: 15 common conditions (burns, bleeding, choking, fracture, snakebite, fever, heat stroke, poisoning, etc.), one entry per condition.
 - `hospitals`: small sample list of Goa facilities. To be replaced later with a full dataset.
 
 ## 8. Code structure (use these names)
-- Screens: AppShell, DashboardScreen, ChatScreen, MapScreen
-- Services: TriageService, RagService, VoiceService, ApiClient, OfflineMapService
-- Data: CaseRepository, HospitalRepository, LocalDatabase
+- Screens: AppShell, DashboardScreen, ChatScreen, MapScreen, LoginScreen, SignUpScreen, ProfileScreen
+- Services: TriageService, RagService, VoiceService, ApiClient, OfflineMapService, AuthService (IAuthService)
+- Data: CaseRepository, HospitalRepository, LocalDatabase, UserRepository (IUserRepository, LocalUserRepository), SessionStore (ISessionStore, LocalSessionStore)
+- Context: ServicesContext, AuthContext (useAuth)
+- Form components: components/forms (TextField, PasswordField, PasswordStrength, ErrorSummary, AuthCard, useFormState); components/common ConfirmDialog
 - Server: TriageController, PromptBuilder, ModelClient, ResponseValidator
-- Types: TriageQuery, TriageResult, Case, Hospital, EmergencyCard, DashboardStats, SeverityColor, SeverityLevel, InputType
+- Types: TriageQuery, TriageResult, Case, Hospital, EmergencyCard, DashboardStats, SeverityColor, SeverityLevel, InputType, User
 
 Rules:
 - Screens never touch storage or the network directly. They call services and repositories only.
 - Only ModelClient (server side) holds the API key.
 - Only ApiClient talks to the server.
 - Only repositories and RagService access LocalDatabase.
+- Only UserRepository and SessionStore touch account storage; screens use AuthContext only.
 
 ## 9. Behavior rules (state logic)
 Triage case lifecycle: Draft -> Submitted -> Awaiting AI -> Result Ready | Fallback Result; or Submitted -> Offline Guidance (when offline). Any result can then be Saved or Discarded. A Saved case can later be Deleted from history.
@@ -99,6 +106,7 @@ Triage case lifecycle: Draft -> Submitted -> Awaiting AI -> Result Ready | Fallb
 - Deleting a case needs a confirmation step.
 - Voice: if transcription is not available, show a message asking the user to type. Transcribed text is inserted into the input field, not sent automatically.
 - Nearest facility: if location permission is denied or the position fails, still show the facility list without distance ordering. If no facility data exists, show a clear message.
+- Accounts (local, on-device convenience, not real security): email is normalized to lowercase and must be unique; passwords are hashed with PBKDF2 (Web Crypto) with a random salt per user, only salt and hash are stored and compared in constant time; the session stores only the userId and survives reload; 5 wrong sign-ins lock sign-in for 30 seconds. Server-side auth replaces this later behind the same interfaces.
 
 ## 10. Build phases
 Finish one phase, then STOP and wait for "next".
@@ -110,7 +118,7 @@ Finish one phase, then STOP and wait for "next".
 6. Capacitor Android wrapper.
 
 ## 11. Out of scope
-Login or accounts, desktop app, video input, social features, fine-tuning, hardcoded per-severity responses.
+Desktop app, video input, social features, fine-tuning, hardcoded per-severity responses.
 
 ## 12. Security
 - The API key and model ID live only in the server's `.env` file.

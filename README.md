@@ -37,7 +37,7 @@ Test the empty state by opening `http://localhost:5173/?empty=1`.
 
 ```
 src/
-  screens/      AppShell, DashboardScreen, ChatScreen, MapScreen
+  screens/      AppShell, DashboardScreen, ChatScreen, MapScreen, LoginScreen, SignUpScreen, ProfileScreen
   components/   common, dashboard, chat, map
   services/     TriageService, RagService, VoiceService, ApiClient, OfflineMapService, LocationService
   data/         repository interfaces, LocalDatabase (stub)
