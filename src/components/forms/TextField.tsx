@@ -12,7 +12,7 @@ export interface TextFieldProps {
   inputMode?: HTMLAttributes<HTMLInputElement>['inputMode'];
   /** Helper text under the field, linked with aria-describedby. */
   hint?: ReactNode;
-  /** Shown with an icon, and the field gets a heavier outline (never colour alone). */
+  /** Shown in red under the field with an error icon, and the field gets a 2 px red outline. */
   error?: string;
   required?: boolean;
   readOnly?: boolean;
@@ -45,9 +45,10 @@ export function TextField({
   const errorId = error ? `${id}-error` : undefined;
   const describedIds = [errorId, hintId, describedBy].filter(Boolean).join(' ') || undefined;
 
-  // Error: text-colour border plus a 1 px ring (heavier outline) and an icon message below.
+  // Invalid: 2 px red outline (1 px border + 1 px ring, so the field does not shift) and a red message with an icon.
+  // Severity red on white is about 5.6:1. Approved exception: form error text and invalid-field borders only.
   const frame = error
-    ? 'border-content bg-surface ring-1 ring-content'
+    ? 'border-severity-red bg-surface ring-1 ring-severity-red'
     : readOnly
       ? 'border-border bg-surface-tint'
       : 'border-content-muted bg-surface';
@@ -80,7 +81,7 @@ export function TextField({
         {trailing}
       </div>
       {error && (
-        <p id={errorId} className="mt-2 flex items-start gap-2 text-sm font-medium leading-5 text-content">
+        <p id={errorId} role="alert" className="mt-2 flex items-start gap-2 text-sm font-medium leading-5 text-severity-red">
           <Icon name="error" className="!text-xl" />
           <span>{error}</span>
         </p>

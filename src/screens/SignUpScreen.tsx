@@ -1,9 +1,9 @@
-import { useRef, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { Button } from '../components/common/Button';
 import { Icon } from '../components/common/Icon';
 import { showToast } from '../components/common/Toast';
 import { AuthCard, LINK_BUTTON } from '../components/forms/AuthCard';
-import { ErrorSummary, type SummaryItem } from '../components/forms/ErrorSummary';
+import { FormError } from '../components/forms/FormError';
 import { PasswordField } from '../components/forms/PasswordField';
 import { PasswordStrength } from '../components/forms/PasswordStrength';
 import { TextField } from '../components/forms/TextField';
@@ -26,7 +26,6 @@ export function SignUpScreen({ onSignIn }: { onSignIn: () => void }) {
   const [takenEmail, setTakenEmail] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const summaryRef = useRef<HTMLDivElement>(null);
 
   const validate = (v: Record<Field, string>): FormErrors<Field> => {
     const e: FormErrors<Field> = {};
@@ -47,27 +46,22 @@ export function SignUpScreen({ onSignIn }: { onSignIn: () => void }) {
     if (submitting) return;
     form.setSubmitted(true);
     setFormError(null);
-    if (form.hasErrors) {
-      summaryRef.current?.focus();
-      return;
-    }
+    if (form.focusFirstInvalid(IDS, ORDER)) return;
     setSubmitting(true);
     try {
       await signUp({ fullName: form.values.fullName, email: form.values.email, password: form.values.password });
       showToast('Account created');
       // Signed in now: AppShell shows the Dashboard.
     } catch (err) {
-      if (err instanceof AuthError && err.code === 'EMAIL_TAKEN') setTakenEmail(normalizeEmail(form.values.email));
-      else setFormError('Could not create the account on this device. Please try again.');
       setSubmitting(false);
-      summaryRef.current?.focus();
+      if (err instanceof AuthError && err.code === 'EMAIL_TAKEN') {
+        setTakenEmail(normalizeEmail(form.values.email)); // shows under the email field
+        form.focusField(IDS.email);
+      } else {
+        setFormError('Could not create the account on this device. Please try again.');
+      }
     }
   };
-
-  const items: SummaryItem[] = [
-    ...(formError ? [{ message: formError }] : []),
-    ...(form.submitted ? ORDER.filter((k) => form.errors[k]).map((k) => ({ id: IDS[k], message: form.errors[k] as string })) : []),
-  ];
 
   return (
     <AuthCard
@@ -83,9 +77,6 @@ export function SignUpScreen({ onSignIn }: { onSignIn: () => void }) {
       }
     >
       <form onSubmit={submit} noValidate className="space-y-4">
-        <div ref={summaryRef} tabIndex={-1} className="focus:outline-none">
-          <ErrorSummary items={items} />
-        </div>
         <TextField id={IDS.fullName} label="Full name" autoComplete="name" required disabled={submitting} {...form.bind('fullName')} />
         <TextField id={IDS.email} label="Email" type="email" autoComplete="email" inputMode="email" required disabled={submitting} {...form.bind('email')} />
         <div>
@@ -101,6 +92,7 @@ export function SignUpScreen({ onSignIn }: { onSignIn: () => void }) {
           <PasswordStrength id={STRENGTH_ID} password={form.values.password} />
         </div>
         <PasswordField id={IDS.confirm} label="Confirm password" autoComplete="new-password" required disabled={submitting} {...form.bind('confirm')} />
+        <FormError message={formError} />
         <Button type="submit" icon="person_add" disabled={submitting} className="w-full">
           {submitting ? 'Creating account…' : 'Create account'}
         </Button>

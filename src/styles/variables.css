@@ -10,7 +10,8 @@
   --color-accent: #B9D5E8;
   --color-border: #D5E1EA;
 
-  /* Severity (reserved for badges and the donut chart only) */
+  /* Severity (reserved for badges, the donut chart and the Red - High card.
+     Exception: --color-severity-red also for form error text and invalid-input borders, never buttons.) */
   --color-severity-red: #C62828;
   --color-severity-red-tint: #FDECEA;
   --color-severity-yellow: #F9A825;

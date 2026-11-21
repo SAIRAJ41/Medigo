@@ -49,4 +49,4 @@ src/
 ## Colors
 
 All colors are CSS variables in `src/styles/variables.css`, mapped into Tailwind in `tailwind.config.js`. No hex values anywhere else.
-Severity colors are used only for severity badges, the donut chart and the emergency card.
+Severity colors are used only for severity badges, the donut chart and the emergency card. Exception: severity red is also used for form error text and the red border of an invalid input (never for buttons).

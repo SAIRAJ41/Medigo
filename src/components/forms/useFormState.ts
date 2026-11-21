@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export type FormErrors<K extends string> = Partial<Record<K, string>>;
 
@@ -37,5 +37,21 @@ export function useFormState<K extends string>(initial: Record<K, string>, valid
     [],
   );
 
-  return { values, errors, hasErrors, submitted, setSubmitted, setValue, bind, reset };
+  // Focus is moved after React has re-rendered, so a field that was disabled while submitting can take it.
+  const [focusRequest, setFocusRequest] = useState<{ id: string } | null>(null);
+  useEffect(() => {
+    if (focusRequest) document.getElementById(focusRequest.id)?.focus();
+  }, [focusRequest]);
+
+  /** Moves focus to the input with this id once the current update has rendered. */
+  const focusField = useCallback((id: string) => setFocusRequest({ id }), []);
+
+  /** Focuses the first field (in `order`) that has an error. Returns false when there is none. */
+  const focusFirstInvalid = (ids: Record<K, string>, order: K[]): boolean => {
+    const first = order.find((k) => errors[k]);
+    if (first) focusField(ids[first]);
+    return first !== undefined;
+  };
+
+  return { values, errors, hasErrors, submitted, setSubmitted, setValue, bind, reset, focusField, focusFirstInvalid };
 }

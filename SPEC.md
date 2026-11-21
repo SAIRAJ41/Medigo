@@ -54,6 +54,7 @@ Rules:
 - Never use the brand blue for a severity badge.
 - Never place text or thin icons in accent #B9D5E8 on a light background.
 - Primary #397BA8 is for buttons, headings and large text, not small body text.
+- Severity colors are used only for severity badges, the donut chart and the Red - High emergency card. Approved exception: severity red (--color-severity-red) is also used for form error text (with an error icon) and the 2 px border of an invalid input. Never for buttons or anything else.
 
 ## 5. How triage works
 1. The user sends text, a photo, or voice (voice is transcribed to text first).
@@ -86,7 +87,7 @@ Seed data:
 - Services: TriageService, RagService, VoiceService, ApiClient, OfflineMapService, AuthService (IAuthService)
 - Data: CaseRepository, HospitalRepository, LocalDatabase, UserRepository (IUserRepository, LocalUserRepository), SessionStore (ISessionStore, LocalSessionStore)
 - Context: ServicesContext, AuthContext (useAuth)
-- Form components: components/forms (TextField, PasswordField, PasswordStrength, ErrorSummary, AuthCard, useFormState); components/common ConfirmDialog
+- Form components: components/forms (TextField, PasswordField, PasswordStrength, FormError, AuthCard, useFormState); components/common ConfirmDialog
 - Server: TriageController, PromptBuilder, ModelClient, ResponseValidator
 - Types: TriageQuery, TriageResult, Case, Hospital, EmergencyCard, DashboardStats, SeverityColor, SeverityLevel, InputType, User
 

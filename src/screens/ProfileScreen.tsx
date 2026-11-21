@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Button } from '../components/common/Button';
 import { ConfirmDialog } from '../components/common/ConfirmDialog';
 import { Icon } from '../components/common/Icon';
 import { showToast } from '../components/common/Toast';
-import { ErrorSummary, type SummaryItem } from '../components/forms/ErrorSummary';
+import { FormError } from '../components/forms/FormError';
 import { PasswordField } from '../components/forms/PasswordField';
 import { PasswordStrength } from '../components/forms/PasswordStrength';
 import { TextField } from '../components/forms/TextField';
@@ -18,9 +18,6 @@ const CARD_TITLE = 'flex items-center gap-2 text-lg font-bold leading-7 text-con
 
 /** Optional phone: 7 to 15 digits, with spaces, +, - or brackets allowed. */
 const isValidPhone = (v: string) => /^[+\d\s()-]+$/.test(v) && (v.match(/\d/g)?.length ?? 0) >= 7 && (v.match(/\d/g)?.length ?? 0) <= 15;
-
-const summaryFor = <K extends string>(errors: FormErrors<K>, ids: Record<K, string>, order: K[], show: boolean): SummaryItem[] =>
-  show ? order.filter((k) => errors[k]).map((k) => ({ id: ids[k], message: errors[k] as string })) : [];
 
 export function ProfileScreen() {
   const { user } = useAuth();
@@ -113,7 +110,6 @@ function DetailsCard({ user }: { user: User }) {
   const form = useFormState<DetailField>(detailsFrom(user), validateDetails);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const summaryRef = useRef<HTMLDivElement>(null);
   const { reset } = form;
 
   // Keep the form in step with the saved user (after Save, or another tab's change on reload).
@@ -127,26 +123,17 @@ function DetailsCard({ user }: { user: User }) {
     if (saving) return;
     form.setSubmitted(true);
     setFormError(null);
-    if (form.hasErrors) {
-      summaryRef.current?.focus();
-      return;
-    }
+    if (form.focusFirstInvalid(DETAIL_IDS, DETAIL_ORDER)) return;
     setSaving(true);
     try {
       await updateProfile({ ...form.values });
       showToast('Profile saved');
     } catch {
       setFormError('Could not save your details on this device. Please try again.');
-      summaryRef.current?.focus();
     } finally {
       setSaving(false);
     }
   };
-
-  const items: SummaryItem[] = [
-    ...(formError ? [{ message: formError }] : []),
-    ...summaryFor(form.errors, DETAIL_IDS, DETAIL_ORDER, form.submitted),
-  ];
 
   return (
     <section className={`${CARD} lg:col-span-2`} aria-labelledby="profile-details-title">
@@ -155,9 +142,6 @@ function DetailsCard({ user }: { user: User }) {
         Personal details
       </h2>
       <form onSubmit={submit} noValidate className="mt-6 space-y-4">
-        <div ref={summaryRef} tabIndex={-1} className="focus:outline-none">
-          <ErrorSummary items={items} />
-        </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <TextField id={DETAIL_IDS.fullName} label="Full name" autoComplete="name" required disabled={saving} {...form.bind('fullName')} />
           <TextField
@@ -189,6 +173,7 @@ function DetailsCard({ user }: { user: User }) {
             {...form.bind('emergencyContactPhone')}
           />
         </div>
+        <FormError message={formError} />
         <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-4">
           <Button
             type="button"
@@ -223,7 +208,6 @@ function ChangePasswordCard() {
   const [wrongCurrent, setWrongCurrent] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-  const summaryRef = useRef<HTMLDivElement>(null);
 
   const validate = (v: Record<PwField, string>): FormErrors<PwField> => {
     const e: FormErrors<PwField> = {};
@@ -243,10 +227,7 @@ function ChangePasswordCard() {
     if (saving) return;
     form.setSubmitted(true);
     setFormError(null);
-    if (form.hasErrors) {
-      summaryRef.current?.focus();
-      return;
-    }
+    if (form.focusFirstInvalid(PW_IDS, PW_ORDER)) return;
     setSaving(true);
     try {
       await changePassword(form.values.current, form.values.next);
@@ -254,18 +235,16 @@ function ChangePasswordCard() {
       setWrongCurrent(null);
       showToast('Password changed');
     } catch (err) {
-      if (err instanceof AuthError && err.code === 'WRONG_PASSWORD') setWrongCurrent(form.values.current);
-      else setFormError('Could not change the password on this device. Please try again.');
-      summaryRef.current?.focus();
+      if (err instanceof AuthError && err.code === 'WRONG_PASSWORD') {
+        setWrongCurrent(form.values.current); // shows under the current password field
+        form.focusField(PW_IDS.current);
+      } else {
+        setFormError('Could not change the password on this device. Please try again.');
+      }
     } finally {
       setSaving(false);
     }
   };
-
-  const items: SummaryItem[] = [
-    ...(formError ? [{ message: formError }] : []),
-    ...summaryFor(form.errors, PW_IDS, PW_ORDER, form.submitted),
-  ];
 
   return (
     <section className={CARD} aria-labelledby="change-password-title">
@@ -274,9 +253,6 @@ function ChangePasswordCard() {
         Change password
       </h2>
       <form onSubmit={submit} noValidate className="mt-6 space-y-4">
-        <div ref={summaryRef} tabIndex={-1} className="focus:outline-none">
-          <ErrorSummary items={items} />
-        </div>
         <PasswordField id={PW_IDS.current} label="Current password" autoComplete="current-password" required disabled={saving} {...form.bind('current')} />
         <div>
           <PasswordField
@@ -291,6 +267,7 @@ function ChangePasswordCard() {
           <PasswordStrength id={PW_STRENGTH_ID} password={form.values.next} />
         </div>
         <PasswordField id={PW_IDS.confirm} label="Confirm new password" autoComplete="new-password" required disabled={saving} {...form.bind('confirm')} />
+        <FormError message={formError} />
         <div className="flex justify-end border-t border-border pt-4">
           <Button type="submit" icon="key" disabled={saving}>
             {saving ? 'Updating…' : 'Update password'}
