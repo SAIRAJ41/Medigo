@@ -37,7 +37,7 @@ cp .env.example .env.local   # VITE_API_URL=http://localhost:8787, VITE_USE_REAL
 npm run dev
 ```
 
-Chat replies now come from the model. History, accounts and hospitals are still sample data, so the "Demo data" badge stays. Without `.env.local` the app uses the built-in mock replies.
+Chat replies now come from the model. Each request also includes the recent messages of the current check as history (max 6, text only), so follow-ups and corrections are understood; "Start a new check" clears it. History, accounts and hospitals are still sample data, so the "Demo data" badge stays. Without `.env.local` the app uses the built-in mock replies.
 
 ## Smoke test
 

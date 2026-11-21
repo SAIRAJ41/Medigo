@@ -7,7 +7,7 @@ import { mockSeverityByCondition } from './mockCases';
  * DEMO stand-in for the server. No AI is called.
  * It builds a reply from the best knowledge base match so the screens can be tested.
  * With no match (for example a photo only) it throws, which the app treats as a failed reply
- * and shows the safe fallback.
+ * and shows the safe fallback. Conversation history (query.history) is ignored here.
  */
 export class MockApiClient implements IApiClient {
   isOnline(): boolean {

@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { config } from '../config';
 import type { InlineImage, ModelClient } from '../services/ModelClient';
-import type { ContextEntry, PromptBuilder } from '../services/PromptBuilder';
+import type { ContextEntry, HistoryEntry, PromptBuilder } from '../services/PromptBuilder';
 import type { ResponseValidator } from '../services/ResponseValidator';
 
 const MAX_TEXT = 1000;
@@ -9,9 +9,13 @@ const MAX_IMAGE_BYTES = 4 * 1024 * 1024; // about 4 MB of image data
 const MAX_CONTEXT = 3;
 const MAX_CONTEXT_NAME = 100;
 const MAX_CONTEXT_GUIDANCE = 1500;
+const MAX_HISTORY = 6;
+const MAX_HISTORY_TEXT = 500;
 const DATA_URL = /^data:(image\/(?:png|jpeg|webp));base64,([A-Za-z0-9+/]+={0,2})$/;
 
-type Parsed = { ok: true; text: string; image?: InlineImage; context: ContextEntry[] } | { ok: false; error: string };
+type Parsed =
+  | { ok: true; text: string; image?: InlineImage; context: ContextEntry[]; history: HistoryEntry[] }
+  | { ok: false; error: string };
 
 /** Checks the request body. Never echoes or logs the user's text or image. */
 function parseBody(body: unknown): Parsed {
@@ -44,7 +48,22 @@ function parseBody(body: unknown): Parsed {
       severityGuidance: (c.severityGuidance as string).trim().slice(0, MAX_CONTEXT_GUIDANCE),
     }));
 
-  return { ok: true, text, image, context };
+  // Optional earlier messages of this check. Invalid shape is rejected; empty entries are dropped.
+  let history: HistoryEntry[] = [];
+  if (b.history !== undefined && b.history !== null) {
+    if (!Array.isArray(b.history)) return { ok: false, error: 'history must be an array' };
+    if (b.history.length > MAX_HISTORY) return { ok: false, error: `history must have at most ${MAX_HISTORY} entries` };
+    for (const h of b.history) {
+      const e = (h && typeof h === 'object' ? h : null) as Record<string, unknown> | null;
+      if (!e || (e.role !== 'user' && e.role !== 'assistant')) return { ok: false, error: 'history role must be "user" or "assistant"' };
+      if (typeof e.text !== 'string') return { ok: false, error: 'history text must be a string' };
+    }
+    history = (b.history as Array<{ role: 'user' | 'assistant'; text: string }>)
+      .map((h) => ({ role: h.role, text: h.text.trim().slice(0, MAX_HISTORY_TEXT) }))
+      .filter((h) => h.text.length > 0);
+  }
+
+  return { ok: true, text, image, context, history };
 }
 
 /** POST /triage: validate, build the prompt, call the model, validate the reply. */
@@ -67,6 +86,7 @@ export class TriageController {
       const prompt = this.prompts.build({
         text: parsed.text,
         context: parsed.context,
+        history: parsed.history, // never logged
         hasImage: !!parsed.image,
         imageSentToModel,
       });

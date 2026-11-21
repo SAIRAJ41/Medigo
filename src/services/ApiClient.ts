@@ -64,7 +64,7 @@ export class ApiClient implements IApiClient {
       const res = await fetch(`${this.baseUrl.replace(/\/+$/, '')}/triage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: query.text, image, context }),
+        body: JSON.stringify({ text: query.text, image, context, history: query.history ?? [] }),
         signal: controller.signal,
       });
       if (!res.ok) throw new Error(`Server returned ${res.status}`);

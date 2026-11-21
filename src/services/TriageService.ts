@@ -1,7 +1,7 @@
 import type { ICaseRepository } from '../data/CaseRepository';
 import type { Case } from '../types/Case';
 import type { InputType } from '../types/InputType';
-import type { TriageQuery } from '../types/TriageQuery';
+import { MAX_HISTORY, type HistoryEntry, type TriageQuery } from '../types/TriageQuery';
 import type { TriageResult } from '../types/TriageResult';
 import type { IApiClient } from './ApiClient';
 import type { RagService } from './RagService';
@@ -19,6 +19,8 @@ export interface TriageInput {
   text: string;
   image: string | null;
   inputType: InputType;
+  /** Earlier messages of the current check (text only, most recent last). */
+  history?: HistoryEntry[];
 }
 
 /** Safe default: always advise emergency help (SPEC section 5, point 6). */
@@ -57,8 +59,11 @@ export class TriageService {
   ) {}
 
   private async buildQuery(input: TriageInput): Promise<TriageQuery> {
-    const context = await this.rag.search(input.text); // top matches, works offline
-    return { text: input.text, image: input.image, inputType: input.inputType, context };
+    const history = (input.history ?? []).slice(-MAX_HISTORY);
+    // Search with the earlier user messages too, so a short follow-up ("it is bleeding now") still matches.
+    const searchText = [...history.filter((h) => h.role === 'user').map((h) => h.text), input.text].join(' ');
+    const context = await this.rag.search(searchText); // top 3 matches, works offline
+    return { text: input.text, image: input.image, inputType: input.inputType, context, history };
   }
 
   async submitQuery(input: TriageInput): Promise<TriageOutcome> {

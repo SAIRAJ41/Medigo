@@ -2,10 +2,26 @@ import { useEffect, useRef, useState } from 'react';
 import { ChatInputBar } from '../components/chat/ChatInputBar';
 import { ChatStream, type Message } from '../components/chat/ChatStream';
 import { SymptomChips } from '../components/chat/SymptomChips';
+import { Button } from '../components/common/Button';
 import { Icon } from '../components/common/Icon';
 import { useServices } from '../context/ServicesContext';
 import type { TriageOutcome } from '../services/TriageService';
 import type { InputType } from '../types/InputType';
+import { MAX_HISTORY, type HistoryEntry } from '../types/TriageQuery';
+import { getSeverityLabel } from '../types/TriageResult';
+
+/** Earlier messages of this check as text only: no loading bubbles, never old photos. */
+function buildHistory(messages: Message[]): HistoryEntry[] {
+  const entries: HistoryEntry[] = [];
+  for (const m of messages) {
+    if (m.role === 'user' && m.text.trim()) entries.push({ role: 'user', text: m.text.trim() });
+    if (m.role === 'assistant') {
+      const r = m.outcome.result;
+      entries.push({ role: 'assistant', text: `${r.condition}, ${getSeverityLabel(r)}: ${r.steps.slice(0, 2).join(' ')}` });
+    }
+  }
+  return entries.slice(-MAX_HISTORY);
+}
 
 export function ChatScreen({ onFindFacility }: { onFindFacility: () => void }) {
   const { triage, voice } = useServices();
@@ -63,6 +79,7 @@ export function ChatScreen({ onFindFacility }: { onFindFacility: () => void }) {
   const send = async () => {
     if (loading || (!text.trim() && !image)) return; // a message cannot be sent with no input
     const inputType: InputType = image ? 'PHOTO' : usedVoice ? 'VOICE' : 'TEXT';
+    const history = buildHistory(messages); // built before the new message is added
     const userMsg: Message = { id: nextId.current++, role: 'user', text: text.trim(), image };
     const loadingId = nextId.current++;
     setMessages((m) => [...m, userMsg, { id: loadingId, role: 'loading' }]);
@@ -71,9 +88,19 @@ export function ChatScreen({ onFindFacility }: { onFindFacility: () => void }) {
     setUsedVoice(false);
     setNotice(null);
     setLoading(true);
-    const outcome = await triage.submitQuery({ text: userMsg.text, image: userMsg.image, inputType });
+    const outcome = await triage.submitQuery({ text: userMsg.text, image: userMsg.image, inputType, history });
     setMessages((m) => m.filter((x) => x.id !== loadingId).concat({ id: nextId.current++, role: 'assistant', outcome }));
     setLoading(false);
+  };
+
+  // Clears this check so history never mixes two different injuries.
+  const startNewCheck = () => {
+    if (recording) voice.stop();
+    attachImage(null);
+    setMessages([]);
+    setText('');
+    setUsedVoice(false);
+    setNotice(null);
   };
 
   const save = async (outcome: TriageOutcome) => {
@@ -91,9 +118,16 @@ export function ChatScreen({ onFindFacility }: { onFindFacility: () => void }) {
       )}
 
       <div className="flex-1 space-y-6 overflow-y-auto px-4 py-6">
-        <div className="border-b border-border pb-4">
-          <h1 className="text-2xl font-bold leading-8 text-content">New Check</h1>
-          <p className="mt-1 text-sm text-content-muted">Describe what happened to get first-aid steps.</p>
+        <div className="flex flex-wrap items-start justify-between gap-4 border-b border-border pb-4">
+          <div>
+            <h1 className="text-2xl font-bold leading-8 text-content">New Check</h1>
+            <p className="mt-1 text-sm text-content-muted">Describe what happened to get first-aid steps.</p>
+          </div>
+          {messages.length > 0 && (
+            <Button variant="outline" icon="restart_alt" onClick={startNewCheck} disabled={loading}>
+              Start a new check
+            </Button>
+          )}
         </div>
         <div className="flex items-start gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-surface" aria-hidden="true">

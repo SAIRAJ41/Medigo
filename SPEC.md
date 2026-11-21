@@ -59,7 +59,7 @@ Rules:
 ## 5. How triage works
 1. The user sends text, a photo, or voice (voice is transcribed to text first).
 2. The app searches the local knowledge base (EmergencyCard entries) and takes the top 3 matches as context. Works offline.
-3. The app POSTs `{text, image (optional), context}` to the proxy at `/triage`.
+3. The app POSTs `{text, image (optional), context, history (optional)}` to the proxy at `/triage`. `history` holds the recent messages of the current check (max 6, text only, never old photos), so follow-ups and corrections are understood; "Start a new check" clears it.
 4. The proxy builds ONE prompt text (role + rules + required JSON schema + up to 3 context entries + the user report inside delimiters; no system instruction or JSON mode, since Gemma may not support them), calls the model (60 s timeout, `MODEL_TIMEOUT_MS`; the app waits 70 s), and validates the reply. Images reach the model only when `ENABLE_IMAGES=true`.
 5. The model must return ONLY this JSON:
    `{"condition": string, "severityColor": "RED"|"YELLOW"|"GREEN", "severityLevel": "LOW"|"MEDIUM"|"HIGH", "steps": string[], "seekFacility": boolean}`
