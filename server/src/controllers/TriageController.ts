@@ -74,8 +74,14 @@ export class TriageController {
       res.json(this.validator.validate(raw)); // the raw model text is never returned
     } catch (err) {
       // Log only the kind of failure, never the user's input or the model output.
+      // The API status and a short, key-redacted error message are enough to diagnose quota or model-name problems.
       const reason = err instanceof Error && err.message === 'MODEL_TIMEOUT' ? 'timeout' : 'model error';
-      console.warn(`[triage] ${reason}; returning fallback`);
+      const status = (err as { status?: unknown })?.status;
+      const detail =
+        reason === 'model error' && err instanceof Error
+          ? ` (${typeof status === 'number' ? `HTTP ${status}: ` : ''}${err.message.replace(/AIza[\w-]+/g, '[redacted]').slice(0, 160)})`
+          : '';
+      console.warn(`[triage] ${reason}${detail}; returning fallback`);
       res.status(200).json(this.validator.fallback());
     }
   };
