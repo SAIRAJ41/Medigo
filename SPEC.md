@@ -16,7 +16,7 @@ AI first-aid triage assistant for rural India. Web app, also wrapped as an Andro
 2. **Chat**: input bar with a + button (attach photo), a text field and a mic button. After a triage reply it shows a result card: severity badge, condition, numbered first-aid steps, and two buttons: "Find Nearest Facility" and "Save to History".
 3. **Map**: list of facilities plus map, nearest facility highlighted.
 
-Navigation: top-left three-line drawer menu. No bottom navigation bar. Back arrow on Chat and Map. No login or account screens in the first build. A profile section will be added later.
+Navigation: top-left three-line drawer menu. No bottom navigation bar. Back arrow on Chat and Map. No login or account screens.
 
 ## 3. Severity system
 - Three categories: Red, Yellow, Green. Each has a level: Low, Medium, High. Total 9 tiers.
@@ -110,7 +110,7 @@ Finish one phase, then STOP and wait for "next".
 6. Capacitor Android wrapper.
 
 ## 11. Out of scope
-Login or accounts (first build only, profile planned later), desktop app, video input, social features, fine-tuning, hardcoded per-severity responses.
+Login or accounts, desktop app, video input, social features, fine-tuning, hardcoded per-severity responses.
 
 ## 12. Security
 - The API key and model ID live only in the server's `.env` file.

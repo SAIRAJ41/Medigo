@@ -1,5 +1,5 @@
 :root {
-  /* Brand palette from colors.md / SPEC.md Section 4 */
+  /* Brand palette (colors.md / SPEC section 4) */
   --color-primary: #397BA8;
   --color-primary-hover: #2F6A93;
   --color-bg-tint: #E8F1F8;
@@ -10,7 +10,7 @@
   --color-accent: #B9D5E8;
   --color-border: #D5E1EA;
 
-  /* Severity colors (separate from brand palette) */
+  /* Severity (reserved for badges and the donut chart only) */
   --color-severity-red: #C62828;
   --color-severity-red-tint: #FDECEA;
   --color-severity-yellow: #F9A825;
@@ -18,4 +18,3 @@
   --color-severity-green: #2E7D32;
   --color-severity-green-tint: #E6F4E8;
 }
-

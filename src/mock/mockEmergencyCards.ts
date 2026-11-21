@@ -1,0 +1,172 @@
+import type { EmergencyCard } from '../types/EmergencyCard';
+
+/**
+ * DEMO knowledge base: 15 common conditions, one entry per condition (SPEC section 7).
+ * severityGuidance holds the first-aid steps, one step per line.
+ * General first-aid wording for demonstration. Have it reviewed by a medical professional before real use.
+ */
+export const mockEmergencyCards: EmergencyCard[] = [
+  {
+    cardId: 1,
+    conditionName: 'Burns',
+    severityGuidance: [
+      'Cool the burn under clean running water for 10 to 20 minutes.',
+      'Remove rings, watches or tight items near the area before swelling starts.',
+      'Do not apply ice, butter, oil or toothpaste.',
+      'Cover loosely with a clean, non-stick cloth. Do not burst blisters.',
+      'Seek medical care if the burn is larger than the palm, on the face, hands or genitals, or blisters are large.',
+    ].join('\n'),
+  },
+  {
+    cardId: 2,
+    conditionName: 'Severe bleeding',
+    severityGuidance: [
+      'Press firmly on the wound with a clean cloth and keep pressing.',
+      'If blood soaks through, add more cloth on top. Do not remove the first one.',
+      'Raise the injured limb above heart level if there is no suspected fracture.',
+      'Call 112 if bleeding does not slow within 10 minutes or the wound is deep.',
+      'Use a tourniquet only if you are trained and the limb bleeding is life-threatening.',
+    ].join('\n'),
+  },
+  {
+    cardId: 3,
+    conditionName: 'Choking',
+    severityGuidance: [
+      'If the person can cough or speak, encourage them to keep coughing.',
+      'If they cannot breathe or speak, call 112 or ask someone to call.',
+      'Give up to 5 firm back blows between the shoulder blades.',
+      'Then give up to 5 abdominal thrusts (pressure just above the navel, inward and upward).',
+      'Repeat until the object comes out or help arrives. Start CPR if the person becomes unresponsive and you are trained.',
+    ].join('\n'),
+  },
+  {
+    cardId: 4,
+    conditionName: 'Fracture or sprain',
+    severityGuidance: [
+      'Keep the injured part still. Do not try to straighten it.',
+      'Support it in the position found using padding, a sling or a splint.',
+      'Apply a cold pack wrapped in cloth for 15 to 20 minutes to reduce swelling.',
+      'Do not let the person put weight on the injury.',
+      'Get medical care. Call 112 if there is severe pain, deformity, numbness, or an open wound with bone visible.',
+    ].join('\n'),
+  },
+  {
+    cardId: 5,
+    conditionName: 'Snakebite',
+    severityGuidance: [
+      'Keep the person calm and as still as possible. Movement spreads venom faster.',
+      'Call 112 and get to a hospital with antivenom urgently.',
+      'Keep the bitten limb still and at or slightly below heart level. Remove rings and tight items.',
+      'Do not cut the wound, suck out venom, apply ice, or tie a tight tourniquet.',
+      'Note the time of the bite and, if safe, remember the snake appearance. Do not try to catch it.',
+    ].join('\n'),
+  },
+  {
+    cardId: 6,
+    conditionName: 'Fever',
+    severityGuidance: [
+      'Rest and drink plenty of fluids.',
+      'Dress lightly and keep the room comfortably cool. Sponge with lukewarm water if uncomfortable.',
+      'Use a fever medicine only as directed on its label.',
+      'Seek care if fever lasts more than 3 days, is very high, or comes with stiff neck, rash, confusion or trouble breathing.',
+      'Seek care at once for fever in a baby under 3 months.',
+    ].join('\n'),
+  },
+  {
+    cardId: 7,
+    conditionName: 'Heat stroke',
+    severityGuidance: [
+      'Call 112. Heat stroke is an emergency.',
+      'Move the person to a cool, shaded place and remove extra clothing.',
+      'Cool the body quickly with wet cloths, water and fanning, especially neck, armpits and groin.',
+      'If fully awake, give small sips of cool water. Do not give drinks if confused or drowsy.',
+      'Keep cooling until help arrives.',
+    ].join('\n'),
+  },
+  {
+    cardId: 8,
+    conditionName: 'Poisoning',
+    severityGuidance: [
+      'Call 112 or a poison information centre straight away.',
+      'Do not make the person vomit and do not give anything to drink unless told to.',
+      'Keep the container, label or sample of what was swallowed to show the doctor.',
+      'If poison is on skin or in the eyes, rinse with clean running water for 15 minutes.',
+      'If the person is drowsy or unconscious, lay them on their side and watch their breathing.',
+    ].join('\n'),
+  },
+  {
+    cardId: 9,
+    conditionName: 'Animal bite',
+    severityGuidance: [
+      'Wash the wound with soap and clean running water for at least 15 minutes.',
+      'Cover with a clean dressing. Do not apply chilli, turmeric or other home remedies.',
+      'Go to a hospital the same day for assessment and anti-rabies and tetanus protection.',
+      'Do this even for a small bite or scratch from a dog, monkey or cat.',
+      'Note which animal and whether it was a stray or pet.',
+    ].join('\n'),
+  },
+  {
+    cardId: 10,
+    conditionName: 'Fainting',
+    severityGuidance: [
+      'Lay the person flat on their back and raise their legs about 30 cm.',
+      'Loosen tight clothing and make sure they have fresh air.',
+      'Check that they are breathing. If not, call 112 and start CPR if trained.',
+      'If they do not wake within 1 minute, call 112.',
+      'Once awake, let them sit up slowly and give water if they are fully alert.',
+    ].join('\n'),
+  },
+  {
+    cardId: 11,
+    conditionName: 'Nosebleed',
+    severityGuidance: [
+      'Sit upright and lean slightly forward. Do not tilt the head back.',
+      'Pinch the soft part of the nose firmly for 10 minutes without releasing.',
+      'Breathe through the mouth and spit out any blood that collects.',
+      'Seek care if bleeding lasts more than 20 minutes or follows a blow to the head.',
+    ].join('\n'),
+  },
+  {
+    cardId: 12,
+    conditionName: 'Eye injury',
+    severityGuidance: [
+      'Do not rub the eye.',
+      'For chemicals or dust, rinse with clean water for at least 15 minutes, holding the eyelids open.',
+      'For a blow or a stuck object, do not press or remove the object. Cover loosely with a clean cup or pad.',
+      'Get medical care urgently for any chemical splash, pain, or vision changes.',
+    ].join('\n'),
+  },
+  {
+    cardId: 13,
+    conditionName: 'Electric shock',
+    severityGuidance: [
+      'Do not touch the person until the power is switched off at the main switch.',
+      'If you cannot switch off, push the source away with a dry wooden stick. Stand on dry material.',
+      'Call 112. Even if the person seems fine, they need a medical check.',
+      'Check breathing. Start CPR if the person is not breathing and you are trained.',
+      'Treat any burns by cooling with clean water and covering loosely.',
+    ].join('\n'),
+  },
+  {
+    cardId: 14,
+    conditionName: 'Drowning',
+    severityGuidance: [
+      'Call 112 or shout for help. Do not put yourself in danger. Reach with a pole or throw a rope or float.',
+      'Once out of the water, check if the person is breathing.',
+      'If not breathing, start CPR with rescue breaths if you are trained.',
+      'If breathing, lay them on their side, keep them warm and watch them until help arrives.',
+      'Everyone who nearly drowned needs a hospital check, even if they seem well.',
+    ].join('\n'),
+  },
+  {
+    cardId: 15,
+    conditionName: 'Insect sting',
+    severityGuidance: [
+      'Scrape out any visible sting sideways with a card or fingernail. Do not squeeze it.',
+      'Wash the area and apply a cold pack wrapped in cloth.',
+      'Watch for 30 minutes for signs of an allergic reaction.',
+      'Call 112 at once if there is swelling of the face or throat, trouble breathing, dizziness or widespread rash.',
+      'Seek care for stings inside the mouth or throat, or many stings at once.',
+    ].join('\n'),
+  },
+];

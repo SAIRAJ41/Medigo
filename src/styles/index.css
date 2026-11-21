@@ -1,27 +1,25 @@
-@import './variables.css';
 @import '@fontsource/inter/400.css';
 @import '@fontsource/inter/500.css';
 @import '@fontsource/inter/600.css';
 @import '@fontsource/inter/700.css';
-@import '@fontsource/material-symbols-outlined/index.css';
+@import '@fontsource/material-symbols-outlined/400.css';
+@import 'leaflet/dist/leaflet.css';
+@import './variables.css';
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  html, body {
-    margin: 0;
-    padding: 0;
-    background-color: var(--color-bg);
-    color: var(--color-text);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
-/* Material symbols outlined font settings */
+/* Local Material Symbols font (bundled, works offline) */
 .material-symbols-outlined {
   font-family: 'Material Symbols Outlined';
   font-weight: normal;
@@ -35,6 +33,24 @@
   word-wrap: normal;
   direction: ltr;
   -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
 }
 
+/* Pulsing dot for the Demo data badge */
+@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+.pulse-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
+
+/* Map marker pins use CSS variables, so no hex in components */
+.pin {
+  width: 14px; height: 14px; border-radius: 9999px;
+  background: var(--color-primary); border: 2px solid var(--color-surface);
+  box-shadow: 0 0 0 2px var(--color-primary);
+}
+.pin-nearest { width: 20px; height: 20px; background: var(--color-primary-hover); }
+.pin-user {
+  width: 16px; height: 16px; border-radius: 9999px;
+  background: var(--color-primary); border: 3px solid var(--color-surface);
+  box-shadow: 0 0 0 6px var(--color-accent);
+}
+.leaflet-container { font-family: 'Inter', system-ui, sans-serif; }

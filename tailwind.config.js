@@ -1,51 +1,26 @@
-/** @type {import('tailwindcss').Config} */
+/** Tailwind theme: every color resolves to a CSS variable from src/styles/variables.css */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       colors: {
-        primary: {
-          DEFAULT: "var(--color-primary)",
-          hover: "var(--color-primary-hover)",
-        },
-        surface: {
-          DEFAULT: "var(--color-surface)",
-          tint: "var(--color-bg-tint)",
-          bg: "var(--color-bg)",
-        },
-        content: {
-          DEFAULT: "var(--color-text)",
-          muted: "var(--color-text-muted)",
-        },
-        accent: {
-          DEFAULT: "var(--color-accent)",
-        },
-        border: {
-          DEFAULT: "var(--color-border)",
-        },
+        primary: { DEFAULT: 'var(--color-primary)', hover: 'var(--color-primary-hover)' },
+        page: 'var(--color-bg)',
+        surface: { DEFAULT: 'var(--color-surface)', tint: 'var(--color-bg-tint)' },
+        content: { DEFAULT: 'var(--color-text)', muted: 'var(--color-text-muted)' },
+        accent: 'var(--color-accent)',
+        border: 'var(--color-border)',
         severity: {
-          red: {
-            DEFAULT: "var(--color-severity-red)",
-            tint: "var(--color-severity-red-tint)",
-          },
-          yellow: {
-            DEFAULT: "var(--color-severity-yellow)",
-            tint: "var(--color-severity-yellow-tint)",
-          },
-          green: {
-            DEFAULT: "var(--color-severity-green)",
-            tint: "var(--color-severity-green-tint)",
-          },
+          red: 'var(--color-severity-red)',
+          'red-tint': 'var(--color-severity-red-tint)',
+          yellow: 'var(--color-severity-yellow)',
+          'yellow-tint': 'var(--color-severity-yellow-tint)',
+          green: 'var(--color-severity-green)',
+          'green-tint': 'var(--color-severity-green-tint)',
         },
       },
-      fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-      },
+      fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
     },
   },
   plugins: [],
 };
-
