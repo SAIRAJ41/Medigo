@@ -11,7 +11,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 1,
     conditionName: 'Burns',
-    keywords: ['burn', 'burned', 'burnt', 'scald', 'scalded', 'hot', 'water', 'fire', 'blister', 'oil', 'steam'],
+    keywords: ['burn', 'burned', 'burnt', 'scald', 'scalded', 'fire', 'blister', 'boiling', 'oil', 'steam'],
     severityColor: 'YELLOW',
     severityLevel: 'MEDIUM',
     seekFacility: false,
@@ -71,7 +71,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 5,
     conditionName: 'Snakebite',
-    keywords: ['snake', 'snakebite', 'bitten', 'fang', 'venom'],
+    keywords: ['snake', 'snakebite', 'bitten', 'bit', 'fang', 'venom', 'saanp'],
     severityColor: 'RED',
     severityLevel: 'HIGH',
     seekFacility: true,
@@ -86,7 +86,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 6,
     conditionName: 'Fever',
-    keywords: ['fever', 'temperature', 'chills', 'shivering'],
+    keywords: ['fever', 'temperature', 'chills', 'shivering', 'bukhar'],
     severityColor: 'YELLOW',
     severityLevel: 'LOW',
     seekFacility: false,

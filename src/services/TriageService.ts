@@ -78,10 +78,11 @@ export class TriageService {
         query,
         result: {
           condition: best.conditionName,
-          severityColor: 'YELLOW',
-          severityLevel: 'MEDIUM',
+          // Use the card's own default rating, so offline Snakebite or Choking is not shown as Yellow.
+          severityColor: best.severityColor,
+          severityLevel: best.severityLevel,
           steps: best.severityGuidance.split('\n'),
-          seekFacility: true,
+          seekFacility: best.seekFacility,
         },
       };
     }
