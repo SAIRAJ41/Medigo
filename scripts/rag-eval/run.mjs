@@ -12,8 +12,10 @@ const rag = new RagService({ getAll: async () => seedEmergencyCards }, 3);
 
 let top1 = 0, top3 = 0, answerable = 0, wrongSilence = 0, falsePositive = 0, shouldBeEmpty = 0;
 const misses = [];
+const top1Misses = [];
 
 for (const { q, expect, note } of queries) {
+  if (expect[0] === '*') continue; // section marker line in queries.json
   const names = (await rag.search(q)).map((c) => c.conditionName);
   if (expect.length === 0) {
     shouldBeEmpty++;
@@ -23,6 +25,7 @@ for (const { q, expect, note } of queries) {
   answerable++;
   if (names.length === 0) wrongSilence++;
   if (expect.includes(names[0])) top1++;
+  else if (names.some((n) => expect.includes(n))) top1Misses.push({ q, expect, got: names, note });
   if (names.some((n) => expect.includes(n))) top3++;
   else misses.push({ q, expect, got: names, note });
 }
@@ -35,4 +38,8 @@ console.log(`False positives:      ${pct(falsePositive, shouldBeEmpty)}  (non-me
 if (misses.length) {
   console.log('\nMisses:');
   for (const m of misses) console.log(`- "${m.q}"\n    expected: ${[].concat(m.expect).join(' | ')}\n    got:      ${m.got.length ? m.got.join(', ') : '(nothing)'}${m.note ? `\n    note:     ${m.note}` : ''}`);
+}
+if (top1Misses.length) {
+  console.log('\nRight card in top 3 but not first:');
+  for (const m of top1Misses) console.log(`- "${m.q}"\n    expected: ${m.expect.join(' | ')}\n    got:      ${m.got.join(', ')}`);
 }

@@ -16,6 +16,8 @@
   - Chat (blue user bubbles, clear disabled Send), Map, Login / Sign-up (solid blue card band) and Profile (blue summary band, no empty space, emphasized Save) restyled.
   - New Settings, Security and Get Help screens. `ICaseRepository.clearAll()` added (only the mock implements it today). Change password moved from Profile to Security (shared `ChangePasswordCard`, inline success message).
 
+- **Knowledge base v2**: 40 first-aid cards (was 15) in `src/data/seed/emergencyCards.ts`, own wording with a source line per card. `KB_VERSION` in `src/data/seed/firstRun.ts` reseeds only `emergencyCards` when the cards change. Retrieval eval in `scripts/rag-eval/` (102 labelled + 8 non-medical queries). Cards still need review by a medical professional.
+
 ## Later
 - **Server auth** replaces local accounts: a server-backed IAuthService and IUserRepository, real sessions and server-side lockouts. The local version is convenience only, not real security.
 - Move users from localStorage to Dexie (IndexedDB) with the other stores.

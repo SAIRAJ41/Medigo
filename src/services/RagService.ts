@@ -5,6 +5,8 @@ import type { EmergencyCard } from '../types/EmergencyCard';
 const STOPWORDS = new Set([
   'a', 'an', 'and', 'am', 'are', 'as', 'at', 'be', 'by', 'for', 'from', 'has', 'have', 'he', 'her', 'his', 'i', 'in', 'is', 'it',
   'its', 'me', 'my', 'of', 'on', 'or', 'she', 'so', 'the', 'then', 'they', 'to', 'was', 'we', 'while', 'with', 'now', 'not', 'very',
+  // Generic words inside card names ("Severe bleeding", "Minor burn", "Road accident") that should not match on their own.
+  'severe', 'minor', 'road',
 ]);
 
 /** Light stemmer: "fangs" -> "fang", "bleeding" -> "bleed". Only needs to be consistent for cards and queries. */

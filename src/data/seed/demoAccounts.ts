@@ -2,7 +2,7 @@
  * PRESENTATION ACCOUNTS for demos and the viva. Not real people's data.
  * Created automatically on the first run, and again from Settings > Reset presentation data.
  * Every row they create is flagged `seeded: true`, so a reset never touches real accounts.
- * The steps, condition names and severities come only from the 15 seed emergency cards.
+ * The steps, condition names and severities come only from the seed emergency cards.
  */
 import { hashNewPassword } from '../../services/AuthService';
 import type { Case } from '../../types/Case';

@@ -79,7 +79,7 @@ Rules:
 - `users` (localStorage for now, moves here later): userId, fullName, email, phone, emergencyContactName, emergencyContactPhone, createdAt, passwordSalt, passwordHash, passwordIterations
 
 Seed data:
-- `emergency_cards`: 15 common conditions (burns, bleeding, choking, fracture, snakebite, fever, heat stroke, poisoning, etc.), one entry per condition.
+- `emergency_cards`: 40 common first-aid conditions (burns, bleeding, choking, fracture, snakebite, fever, heat stroke, poisoning, CPR, stroke, seizure, etc.), one entry per condition. A knowledge base version in the `meta` table reseeds only this store when the cards change.
 - `hospitals`: small sample list of Goa facilities. To be replaced later with a full dataset.
 
 ## 8. Code structure (use these names)
