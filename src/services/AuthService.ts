@@ -2,7 +2,7 @@
  * Local, on-device accounts.
  *
  * IMPORTANT: this is on-device convenience, NOT real security. Anyone with access to this
- * browser profile can read or wipe localStorage, and the sign-in rate limit only lives in memory.
+ * browser profile can read or wipe IndexedDB, and the sign-in rate limit only lives in memory.
  * Server-side authentication (accounts, sessions, lockouts) replaces this later behind IAuthService.
  */
 import type { ISessionStore } from '../data/SessionStore';
@@ -88,7 +88,8 @@ function constantTimeEqual(a: Uint8Array, b: Uint8Array): boolean {
   return diff === 0;
 }
 
-async function hashNewPassword(password: string) {
+/** Fresh salt + PBKDF2 hash for a new password. Also used by the presentation-account seed. */
+export async function hashNewPassword(password: string) {
   const salt = crypto.getRandomValues(new Uint8Array(SALT_BYTES));
   const hash = await deriveHash(password, salt, ITERATIONS);
   return { passwordSalt: toBase64(salt), passwordHash: toBase64(hash), passwordIterations: ITERATIONS };

@@ -5,8 +5,8 @@ import { Icon } from '../common/Icon';
 export function EmptyProfileState({ onStart }: { onStart: () => void }) {
   return (
     <div className="rounded-xl border border-border bg-surface p-10 text-center">
-      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-surface-tint">
-        <Icon name="fact_check" className="text-primary-hover" />
+      <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-soft-sage">
+        <Icon name="fact_check" className="text-content" />
       </div>
       <h2 className="text-lg font-bold leading-6 text-content">No checks yet</h2>
       <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-content-muted">

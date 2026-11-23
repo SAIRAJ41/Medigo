@@ -13,7 +13,7 @@ export function SymptomChips({ onPick }: { onPick: (text: string) => void }) {
         <button
           key={c.label}
           onClick={() => onPick(c.text)}
-          className="inline-flex h-8 items-center rounded-full bg-accent px-4 text-sm font-medium leading-none text-content hover:bg-primary hover:text-surface active:bg-primary-hover active:text-surface"
+          className="inline-flex h-11 items-center rounded-lg border border-border bg-surface px-4 text-sm font-medium leading-none text-content hover:border-primary hover:text-primary-hover active:bg-surface-tint"
         >
           {c.label}
         </button>

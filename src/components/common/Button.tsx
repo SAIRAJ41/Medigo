@@ -10,7 +10,7 @@ const STYLES: Record<Variant, string> = {
   secondary:
     'border border-surface-tint bg-surface-tint text-primary-hover hover:border-accent hover:bg-accent active:bg-accent disabled:text-content-muted',
   outline:
-    'border border-content-muted bg-surface text-content hover:bg-surface-tint active:bg-accent disabled:border-border disabled:bg-surface-tint disabled:text-content-muted',
+    'border border-border bg-surface text-content hover:border-content-muted hover:bg-page active:bg-surface-tint disabled:border-border disabled:bg-surface-tint disabled:text-content-muted',
 };
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -24,7 +24,7 @@ export function Button({ variant = 'primary', icon, children, className = '', ..
   return (
     <button
       {...rest}
-      className={`inline-flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 text-sm font-semibold leading-none disabled:cursor-not-allowed ${STYLES[variant]} ${className}`}
+      className={`inline-flex h-11 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 text-sm font-semibold leading-none disabled:cursor-not-allowed ${STYLES[variant]} ${className}`}
     >
       {icon && <Icon name={icon} className="!text-xl" />}
       {children}

@@ -31,3 +31,7 @@ export class LocalSessionStore implements ISessionStore {
     }
   }
 }
+
+/** The signed-in user's id, read fresh on every call. Repositories filter every query by it. */
+export type UserIdSource = () => number | null;
+export const sessionUserId: UserIdSource = () => new LocalSessionStore().getUserId();

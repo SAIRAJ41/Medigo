@@ -1,9 +1,14 @@
 /**
- * One switch for the whole data layer.
- * true  = mock repositories and mock triage service, "Demo data" badge visible.
- * false = real IndexedDB (Dexie) and the proxy ApiClient (to be wired later).
+ * Storage is real now: accounts, conversations and saved checks live in IndexedDB (Dexie) on this device.
+ * true only brings back the "Demo data" badge and the dashboard's demo map position (Panaji); data stays real.
  */
-export const IS_DEMO_MODE = true;
+export const IS_DEMO_MODE = false;
+
+/**
+ * Shows the "Presentation accounts" card on the Sign in page (seven seeded accounts, one shared password).
+ * Set to false for real use.
+ */
+export const SHOW_DEMO_ACCOUNTS = true;
 
 /**
  * true  = Chat sends triage to the Express proxy (real AI) through ApiClient.

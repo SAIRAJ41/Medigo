@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Button } from '../components/common/Button';
+import { SeverityBadge } from '../components/common/SeverityBadge';
 import { showToast } from '../components/common/Toast';
 import { CaseDialog } from '../components/dashboard/CaseDialog';
 import { EmptyProfileState } from '../components/dashboard/EmptyProfileState';
 import { RecentChecksList } from '../components/dashboard/RecentChecksList';
+import { ChecksChart } from '../components/dashboard/ChecksChart';
 import { SeverityPieChart } from '../components/dashboard/SeverityPieChart';
 import { StatCard } from '../components/dashboard/StatCard';
 import { IS_DEMO_MODE } from '../config/env';
@@ -22,11 +24,12 @@ export function DashboardScreen({ onStartCheck }: { onStartCheck: () => void }) 
   const name = user ? firstName(user.fullName) : '';
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recent, setRecent] = useState<Case[]>([]);
+  const [all, setAll] = useState<Case[]>([]);
   const [open, setOpen] = useState<Case | null>(null);
 
   // loadDashboard: stats, 5 recent cases, nearest facility
   const load = useCallback(async () => {
-    const [s, r] = await Promise.all([cases.getStats(), cases.getRecent(5)]);
+    const [s, r, a] = await Promise.all([cases.getStats(), cases.getRecent(5), cases.getAll()]);
     const pos = location.lastKnown() ?? (IS_DEMO_MODE ? DEMO_POSITION : null);
     if (pos) {
       const [nearest] = await hospitals.findNearest(pos.lat, pos.lon, 1);
@@ -37,6 +40,7 @@ export function DashboardScreen({ onStartCheck }: { onStartCheck: () => void }) 
     }
     setStats(s);
     setRecent(r);
+    setAll(a);
   }, [cases, hospitals, location]);
 
   useEffect(() => {
@@ -54,21 +58,18 @@ export function DashboardScreen({ onStartCheck }: { onStartCheck: () => void }) 
 
   if (!stats) return <DashboardSkeleton />;
   const empty = stats.totalChecks === 0;
+  const last = recent[0];
   const usingDemoPosition = !location.lastKnown() && IS_DEMO_MODE;
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] space-y-8 px-4 py-8 md:px-6">
-      {/* Greeting row */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="mx-auto w-full max-w-[1200px] space-y-6 px-4 py-8 md:px-8">
+      {/* Title row */}
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold leading-10 text-content">{name ? `Hello, ${name}` : 'Hello'}</h1>
-            <span className="inline-flex h-8 items-center gap-2 rounded-full bg-accent px-3 text-xs font-semibold leading-none text-content">
-              <span className="h-2 w-2 shrink-0 rounded-full bg-primary-hover" />
-              Triage Ready
-            </span>
-          </div>
-          <p className="mt-1 text-sm leading-5 text-content-muted">How are you feeling today?</p>
+          <h1 className="text-3xl font-bold leading-10 text-content">Dashboard</h1>
+          <p className="mt-1 text-sm leading-5 text-content-muted">
+            {name ? `Hello, ${name}. ` : ''}Here is a summary of your saved checks.
+          </p>
         </div>
         <Button icon="add" onClick={onStartCheck} className="px-6">
           Start a New Check
@@ -76,17 +77,20 @@ export function DashboardScreen({ onStartCheck }: { onStartCheck: () => void }) 
       </div>
 
       {/* Stats row */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <StatCard icon="fact_check" label="Total Checks" value={stats.totalChecks} sub="All time" />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard hero icon="fact_check" label="Total Checks" value={stats.totalChecks} sub="All time, on this device" />
         <StatCard
           icon="schedule"
           label="Last Check"
+          badge="cream"
           value={stats.lastCheck ? formatWhen(stats.lastCheck) : 'None yet'}
-          sub={stats.lastCheckSeverity ? <SeverityDot color={stats.lastCheckSeverity} /> : undefined}
+          sub={last ? <SeverityBadge color={last.severityColor} level={last.severityLevel} /> : 'Start a check to see it here'}
         />
         <StatCard
           icon="local_hospital"
           label="Nearest Facility"
+          badge="sage"
+          wrap
           value={stats.nearestFacility ?? 'Not located'}
           sub={
             stats.nearestDistanceKm !== null
@@ -94,23 +98,31 @@ export function DashboardScreen({ onStartCheck }: { onStartCheck: () => void }) 
               : 'Open the map to find one'
           }
         />
+        <StatCard icon="emergency" label="Red Cases" value={stats.severityCounts.RED} sub="Checks rated Red" />
       </div>
 
       {empty ? (
         <EmptyProfileState onStart={onStartCheck} />
       ) : (
-        <div className="grid gap-6 lg:grid-cols-5">
-          <section className="flex min-w-0 flex-col rounded-xl border border-border bg-surface p-6 lg:col-span-2">
-            <h2 className="text-lg font-bold leading-7 text-content">Severity Overview</h2>
-            <p className="mb-6 mt-1 text-sm leading-5 text-content-muted">Breakdown across {stats.totalChecks} saved checks</p>
-            <SeverityPieChart counts={stats.severityCounts} />
-          </section>
-          <section className="min-w-0 rounded-xl border border-border bg-surface p-6 lg:col-span-3">
-            <h2 className="text-lg font-bold leading-7 text-content">Recent Checks</h2>
+        <>
+          <div className="grid gap-6 lg:grid-cols-5">
+            <section className={`${CARD} lg:col-span-3`} aria-labelledby="chart-title">
+              <h2 id="chart-title" className={CARD_TITLE}>Checks over time</h2>
+              <p className={CARD_SUB}>Checks per day, last 14 days</p>
+              <ChecksChart cases={all} />
+            </section>
+            <section className={`${CARD} lg:col-span-2`} aria-labelledby="severity-title">
+              <h2 id="severity-title" className={CARD_TITLE}>Severity Overview</h2>
+              <p className={CARD_SUB}>Across {stats.totalChecks} saved checks</p>
+              <SeverityPieChart counts={stats.severityCounts} />
+            </section>
+          </div>
+          <section className={CARD} aria-labelledby="recent-title">
+            <h2 id="recent-title" className={CARD_TITLE}>Recent Checks</h2>
             <p className="mb-4 mt-1 text-sm leading-5 text-content-muted">Your last {recent.length} saved checks</p>
             <RecentChecksList cases={recent} onOpen={openCase} />
           </section>
-        </div>
+        </>
       )}
 
       {open && <CaseDialog item={open} onClose={() => setOpen(null)} onDelete={deleteCase} />}
@@ -118,21 +130,14 @@ export function DashboardScreen({ onStartCheck }: { onStartCheck: () => void }) 
   );
 }
 
-function SeverityDot({ color }: { color: 'RED' | 'YELLOW' | 'GREEN' }) {
-  const label = { RED: 'Red', YELLOW: 'Yellow', GREEN: 'Green' }[color];
-  const dot = { RED: 'bg-severity-red', YELLOW: 'bg-severity-yellow', GREEN: 'bg-severity-green' }[color];
-  return (
-    <span className="inline-flex items-center gap-2">
-      <span className={`h-2 w-2 shrink-0 rounded-full ${dot}`} />
-      {label} result
-    </span>
-  );
-}
+const CARD = 'min-w-0 rounded-xl border border-border bg-surface p-6';
+const CARD_TITLE = 'text-lg font-bold leading-7 text-content';
+const CARD_SUB = 'mb-6 mt-1 text-sm leading-5 text-content-muted';
 
 /** Placeholder blocks that match the real layout while data loads. */
 function DashboardSkeleton() {
   return (
-    <div className="mx-auto w-full max-w-[1200px] space-y-8 px-4 py-8 md:px-6" aria-busy="true" aria-label="Loading dashboard">
+    <div className="mx-auto w-full max-w-[1200px] space-y-6 px-4 py-8 md:px-8" aria-busy="true" aria-label="Loading dashboard">
       <div className="flex items-center justify-between gap-4">
         <div className="space-y-2">
           <div className="skeleton h-10 w-48" />
@@ -140,14 +145,14 @@ function DashboardSkeleton() {
         </div>
         <div className="skeleton h-10 w-48" />
       </div>
-      <div className="grid gap-4 md:grid-cols-3">
-        {[0, 1, 2].map((i) => (
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {[0, 1, 2, 3].map((i) => (
           <div key={i} className="skeleton h-[132px] !rounded-xl" />
         ))}
       </div>
       <div className="grid gap-6 lg:grid-cols-5">
-        <div className="skeleton h-80 !rounded-xl lg:col-span-2" />
         <div className="skeleton h-80 !rounded-xl lg:col-span-3" />
+        <div className="skeleton h-80 !rounded-xl lg:col-span-2" />
       </div>
     </div>
   );

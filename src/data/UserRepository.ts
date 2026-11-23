@@ -1,10 +1,13 @@
 import type { User } from '../types/User';
+import { db, type LocalDatabase } from './LocalDatabase';
 
 /** A user plus the password material. Only AuthService ever sees these extra fields. */
 export interface StoredUser extends User {
   passwordSalt: string; // base64, random per user
   passwordHash: string; // base64 PBKDF2 output, never the password itself
   passwordIterations: number;
+  /** True for the presentation accounts from src/data/seed/demoAccounts.ts. */
+  seeded?: boolean;
 }
 
 export type NewStoredUser = Omit<StoredUser, 'userId'>;
@@ -19,57 +22,48 @@ export interface IUserRepository {
   delete(id: number): Promise<void>;
 }
 
-const USERS_KEY = 'medigo.users';
-
-/**
- * Local accounts kept in localStorage for now.
- * TODO: moves to Dexie (IndexedDB, a `users` store) together with the other LocalDatabase stores.
- */
-export class LocalUserRepository implements IUserRepository {
-  private read(): StoredUser[] {
-    try {
-      const raw = localStorage.getItem(USERS_KEY);
-      const list: unknown = raw ? JSON.parse(raw) : [];
-      return Array.isArray(list) ? (list as StoredUser[]) : [];
-    } catch {
-      return [];
-    }
-  }
-
-  private write(list: StoredUser[]) {
-    localStorage.setItem(USERS_KEY, JSON.stringify(list));
-  }
+/** Accounts in the Dexie `users` table. Email is unique and always lowercase. */
+export class DexieUserRepository implements IUserRepository {
+  constructor(private readonly database: LocalDatabase = db) {}
 
   async create(user: NewStoredUser): Promise<StoredUser> {
-    const list = this.read();
+    await this.database.ready();
     const email = user.email.trim().toLowerCase();
-    if (list.some((u) => u.email === email)) throw new Error('EMAIL_TAKEN');
-    const userId = list.reduce((max, u) => Math.max(max, u.userId), 0) + 1;
-    const created: StoredUser = { ...user, email, userId };
-    this.write([...list, created]);
-    return created;
+    if (await this.database.users.where('email').equals(email).first()) throw new Error('EMAIL_TAKEN');
+    const userId = await this.database.users.add({ ...user, email } as StoredUser);
+    return { ...user, email, userId };
   }
 
   async findByEmail(email: string): Promise<StoredUser | undefined> {
-    const key = email.trim().toLowerCase();
-    return this.read().find((u) => u.email === key);
+    await this.database.ready();
+    return this.database.users.where('email').equals(email.trim().toLowerCase()).first();
   }
 
   async getById(id: number): Promise<StoredUser | undefined> {
-    return this.read().find((u) => u.userId === id);
+    await this.database.ready();
+    return this.database.users.get(id);
   }
 
   async update(id: number, changes: StoredUserChanges): Promise<StoredUser> {
-    const list = this.read();
-    const index = list.findIndex((u) => u.userId === id);
-    if (index < 0) throw new Error('NOT_FOUND');
-    const updated: StoredUser = { ...list[index], ...changes, userId: id };
-    list[index] = updated;
-    this.write(list);
+    await this.database.ready();
+    const current = await this.database.users.get(id);
+    if (!current) throw new Error('NOT_FOUND');
+    const updated: StoredUser = { ...current, ...changes, userId: id };
+    // put (not update) so optional fields cleared to undefined are really removed
+    await this.database.users.put(updated);
     return updated;
   }
 
+  /** Removes the account and everything it owns: conversations, messages and saved checks. */
   async delete(id: number): Promise<void> {
-    this.write(this.read().filter((u) => u.userId !== id));
+    await this.database.ready();
+    const d = this.database;
+    await d.transaction('rw', [d.users, d.conversations, d.messages, d.cases], async () => {
+      const convIds = (await d.conversations.where('userId').equals(id).primaryKeys()) as number[];
+      await d.messages.where('conversationId').anyOf(convIds).delete();
+      await d.conversations.where('userId').equals(id).delete();
+      await d.cases.where('userId').equals(id).delete();
+      await d.users.delete(id);
+    });
   }
 }

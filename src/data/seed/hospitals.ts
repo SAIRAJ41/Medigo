@@ -1,10 +1,10 @@
-import type { Hospital } from '../types/Hospital';
+import type { Hospital } from '../../types/Hospital';
 
 /**
- * DEMO hospitals: small sample list of Goa facilities.
+ * SAMPLE DATA, not a verified directory: six Goa facilities used to seed the Dexie `hospitals` table on first run.
  * Coordinates and addresses are approximate. Replace with the verified dataset later.
  */
-export const mockHospitals: Hospital[] = [
+export const seedHospitals: Hospital[] = [
   { hospitalId: 1, name: 'Goa Medical College and Hospital', latitude: 15.4627, longitude: 73.8552, address: 'Bambolim, Goa' },
   { hospitalId: 2, name: 'Asilo Hospital', latitude: 15.5909, longitude: 73.8082, address: 'Mapusa, North Goa' },
   { hospitalId: 3, name: 'District Hospital (Hospicio)', latitude: 15.28, longitude: 73.957, address: 'Margao, South Goa' },

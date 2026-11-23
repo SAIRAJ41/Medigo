@@ -96,13 +96,14 @@ export class TriageService {
     return { status: 'FALLBACK', query, result: fallbackResult() };
   }
 
-  /** Saves a finished check to history. */
-  async saveCase(outcome: TriageOutcome): Promise<Case> {
+  /** Saves a finished check to history, linked to the conversation it came from. */
+  async saveCase(outcome: TriageOutcome, conversationId: number | null = null): Promise<Case> {
     const { query, result } = outcome;
     return this.cases.save({
+      conversationId,
       condition: result.condition,
       inputText: query.text,
-      inputImagePath: query.image,
+      inputImagePath: null, // photos are not stored; object URLs do not survive a reload
       severityColor: result.severityColor,
       severityLevel: result.severityLevel,
       guidance: result.steps.join('\n'),

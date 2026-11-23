@@ -14,7 +14,7 @@ html, body, #root { height: 100%; }
 
 body {
   margin: 0;
-  background: var(--color-bg);
+  background: var(--color-bg-tint);
   color: var(--color-text);
   font-family: 'Inter', system-ui, sans-serif;
 }
@@ -74,13 +74,13 @@ body {
 }
 :where(a, button):not(:disabled):active { transform: translateY(1px); }
 
-/* Scrim behind the drawer and dialog, built from the text token */
+/* Scrim behind the sidebar drawer and dialog, built from the text token */
 .scrim { background: color-mix(in srgb, var(--color-text) 40%, transparent); }
 
 /* Skeleton placeholders used instead of "Loading..." text */
 @keyframes skeleton-pulse { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
 .skeleton {
-  background: var(--color-bg-tint);
+  background: var(--color-soft-blue);
   border-radius: 8px;
   animation: skeleton-pulse 1.4s ease-in-out infinite;
 }

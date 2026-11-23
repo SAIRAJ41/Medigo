@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { LocalSessionStore } from '../data/SessionStore';
-import { LocalUserRepository } from '../data/UserRepository';
+import { DexieUserRepository } from '../data/UserRepository';
 import { AuthService, type IAuthService, type ProfileChanges, type SignUpInput } from '../services/AuthService';
 import type { User } from '../types/User';
 
@@ -18,7 +18,7 @@ export interface AuthContextValue {
 }
 
 /** The only place that picks the auth implementation. Swap for a server-backed IAuthService later. */
-const auth: IAuthService = new AuthService(new LocalUserRepository(), new LocalSessionStore());
+const auth: IAuthService = new AuthService(new DexieUserRepository(), new LocalSessionStore());
 
 const Ctx = createContext<AuthContextValue | null>(null);
 

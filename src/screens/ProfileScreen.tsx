@@ -4,12 +4,9 @@ import { ConfirmDialog } from '../components/common/ConfirmDialog';
 import { Icon } from '../components/common/Icon';
 import { showToast } from '../components/common/Toast';
 import { FormError } from '../components/forms/FormError';
-import { PasswordField } from '../components/forms/PasswordField';
-import { PasswordStrength } from '../components/forms/PasswordStrength';
 import { TextField } from '../components/forms/TextField';
 import { useFormState, type FormErrors } from '../components/forms/useFormState';
 import { useAuth } from '../context/AuthContext';
-import { AuthError, MIN_PASSWORD_LENGTH } from '../services/AuthService';
 import type { User } from '../types/User';
 import { formatDate, initials } from '../utils/format';
 
@@ -19,24 +16,23 @@ const CARD_TITLE = 'flex items-center gap-2 text-lg font-bold leading-7 text-con
 /** Optional phone: 7 to 15 digits, with spaces, +, - or brackets allowed. */
 const isValidPhone = (v: string) => /^[+\d\s()-]+$/.test(v) && (v.match(/\d/g)?.length ?? 0) >= 7 && (v.match(/\d/g)?.length ?? 0) <= 15;
 
-export function ProfileScreen() {
+export function ProfileScreen({ onOpenSecurity }: { onOpenSecurity: () => void }) {
   const { user } = useAuth();
   if (!user) return null; // AppShell only renders this when signed in
   return (
-    <div className="mx-auto w-full max-w-[1200px] space-y-8 px-4 py-8 md:px-6">
-      <div className="border-b border-border pb-4">
-        <h1 className="text-2xl font-bold leading-8 text-content">Profile</h1>
+    <div className="mx-auto w-full max-w-[1200px] space-y-6 px-4 py-8 md:px-8">
+      <div>
+        <h1 className="text-3xl font-bold leading-10 text-content">Profile</h1>
         <p className="mt-1 text-sm leading-5 text-content-muted">Your details are stored on this device only.</p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <SummaryCard user={user} />
+      {/* Left column stacks to its content height, so the summary card has no empty space. */}
+      <div className="grid items-start gap-6 lg:grid-cols-3">
+        <div className="space-y-6">
+          <SummaryCard user={user} />
+          <AccountCard onOpenSecurity={onOpenSecurity} />
+        </div>
         <DetailsCard user={user} />
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <ChangePasswordCard />
-        <AccountCard />
       </div>
     </div>
   );
@@ -46,14 +42,17 @@ export function ProfileScreen() {
 
 function SummaryCard({ user }: { user: User }) {
   return (
-    <section className={`${CARD} flex flex-col items-center text-center`} aria-label="Account summary">
+    <section className="overflow-hidden rounded-xl border border-border bg-surface text-center" aria-label="Account summary">
+      {/* Solid primary band; the avatar overlaps its lower edge. */}
+      <div className="h-16 bg-primary" />
+      <div className="flex flex-col items-center px-6 pb-6">
       <div
-        className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-primary bg-surface-tint text-2xl font-bold leading-none text-primary"
+        className="-mt-10 flex h-20 w-20 items-center justify-center rounded-full border-4 border-surface bg-soft-blue text-2xl font-bold leading-none text-content"
         aria-hidden="true"
       >
         {initials(user.fullName)}
       </div>
-      <h2 className="mt-4 text-lg font-bold leading-7 text-content">{user.fullName}</h2>
+      <h2 className="mt-3 text-lg font-bold leading-7 text-content">{user.fullName}</h2>
       <p className="mt-1 break-all text-sm leading-5 text-content-muted">{user.email}</p>
       <p className="mt-4 inline-flex h-8 items-center gap-2 rounded-full bg-surface-tint px-3 text-xs font-semibold leading-none text-content">
         <Icon name="calendar_today" className="!text-base" />
@@ -73,6 +72,7 @@ function SummaryCard({ user }: { user: User }) {
           )}
         </div>
       )}
+      </div>
     </section>
   );
 }
@@ -121,6 +121,10 @@ function DetailsCard({ user }: { user: User }) {
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (saving) return;
+    if (!dirty) {
+      showToast('No changes to save');
+      return;
+    }
     form.setSubmitted(true);
     setFormError(null);
     if (form.focusFirstInvalid(DETAIL_IDS, DETAIL_ORDER)) return;
@@ -175,6 +179,9 @@ function DetailsCard({ user }: { user: User }) {
         </div>
         <FormError message={formError} />
         <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border pt-4">
+          <span className="mr-auto text-xs leading-5 text-content-muted" aria-live="polite">
+            {dirty ? 'You have unsaved changes.' : 'All changes saved.'}
+          </span>
           <Button
             type="button"
             variant="outline"
@@ -186,91 +193,9 @@ function DetailsCard({ user }: { user: User }) {
           >
             Cancel
           </Button>
-          <Button type="submit" icon="save" disabled={saving || !dirty}>
-            {saving ? 'Saving…' : 'Save'}
-          </Button>
-        </div>
-      </form>
-    </section>
-  );
-}
-
-/* ---------- Change password ---------- */
-
-type PwField = 'current' | 'next' | 'confirm';
-const PW_IDS: Record<PwField, string> = { current: 'pw-current', next: 'pw-new', confirm: 'pw-confirm' };
-const PW_ORDER: PwField[] = ['current', 'next', 'confirm'];
-const PW_STRENGTH_ID = 'pw-new-strength';
-const EMPTY_PW: Record<PwField, string> = { current: '', next: '', confirm: '' };
-
-function ChangePasswordCard() {
-  const { changePassword } = useAuth();
-  const [wrongCurrent, setWrongCurrent] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-
-  const validate = (v: Record<PwField, string>): FormErrors<PwField> => {
-    const e: FormErrors<PwField> = {};
-    if (!v.current) e.current = 'Enter your current password.';
-    else if (wrongCurrent !== null && v.current === wrongCurrent) e.current = 'Current password is incorrect.';
-    if (v.next.length < MIN_PASSWORD_LENGTH) e.next = `New password must be at least ${MIN_PASSWORD_LENGTH} characters.`;
-    else if (v.next === v.current) e.next = 'Choose a password different from your current one.';
-    if (!v.confirm) e.confirm = 'Enter the new password again.';
-    else if (v.confirm !== v.next) e.confirm = 'Passwords do not match.';
-    return e;
-  };
-
-  const form = useFormState<PwField>(EMPTY_PW, validate);
-
-  const submit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (saving) return;
-    form.setSubmitted(true);
-    setFormError(null);
-    if (form.focusFirstInvalid(PW_IDS, PW_ORDER)) return;
-    setSaving(true);
-    try {
-      await changePassword(form.values.current, form.values.next);
-      form.reset(EMPTY_PW);
-      setWrongCurrent(null);
-      showToast('Password changed');
-    } catch (err) {
-      if (err instanceof AuthError && err.code === 'WRONG_PASSWORD') {
-        setWrongCurrent(form.values.current); // shows under the current password field
-        form.focusField(PW_IDS.current);
-      } else {
-        setFormError('Could not change the password on this device. Please try again.');
-      }
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  return (
-    <section className={CARD} aria-labelledby="change-password-title">
-      <h2 id="change-password-title" className={CARD_TITLE}>
-        <Icon name="key" className="!text-xl text-primary-hover" />
-        Change password
-      </h2>
-      <form onSubmit={submit} noValidate className="mt-6 space-y-4">
-        <PasswordField id={PW_IDS.current} label="Current password" autoComplete="current-password" required disabled={saving} {...form.bind('current')} />
-        <div>
-          <PasswordField
-            id={PW_IDS.next}
-            label="New password"
-            autoComplete="new-password"
-            required
-            disabled={saving}
-            describedBy={PW_STRENGTH_ID}
-            {...form.bind('next')}
-          />
-          <PasswordStrength id={PW_STRENGTH_ID} password={form.values.next} />
-        </div>
-        <PasswordField id={PW_IDS.confirm} label="Confirm new password" autoComplete="new-password" required disabled={saving} {...form.bind('confirm')} />
-        <FormError message={formError} />
-        <div className="flex justify-end border-t border-border pt-4">
-          <Button type="submit" icon="key" disabled={saving}>
-            {saving ? 'Updating…' : 'Update password'}
+          {/* Always the strongest control on the page; with nothing changed it just says so. */}
+          <Button type="submit" icon="save" disabled={saving} className="px-8">
+            {saving ? 'Saving…' : 'Save changes'}
           </Button>
         </div>
       </form>
@@ -280,7 +205,7 @@ function ChangePasswordCard() {
 
 /* ---------- Sign out / delete ---------- */
 
-function AccountCard() {
+function AccountCard({ onOpenSecurity }: { onOpenSecurity: () => void }) {
   const { signOut, deleteAccount } = useAuth();
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -308,7 +233,19 @@ function AccountCard() {
         Account
       </h2>
       <div className="mt-6 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl bg-surface-tint p-4">
+        <button
+          type="button"
+          onClick={onOpenSecurity}
+          className="flex w-full items-center gap-3 rounded-lg bg-surface-tint p-4 text-left hover:bg-accent"
+        >
+          <Icon name="key" className="!text-xl text-primary-hover" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-semibold leading-5 text-content">Password and security</span>
+            <span className="mt-1 block text-xs leading-5 text-content-muted">Change your password on the Security page.</span>
+          </span>
+          <Icon name="chevron_right" className="!text-xl text-content-muted" />
+        </button>
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border p-4">
           <div className="min-w-0">
             <p className="text-sm font-semibold leading-5 text-content">Sign out</p>
             <p className="mt-1 text-xs leading-5 text-content-muted">Your account and saved checks stay on this device.</p>
@@ -317,7 +254,7 @@ function AccountCard() {
             Sign out
           </Button>
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-content-muted p-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border p-4">
           <div className="min-w-0">
             <p className="text-sm font-semibold leading-5 text-content">Delete account</p>
             <p className="mt-1 text-xs leading-5 text-content-muted">Removes your profile and password from this device. This cannot be undone.</p>

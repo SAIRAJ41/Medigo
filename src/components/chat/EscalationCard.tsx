@@ -11,7 +11,7 @@ export function EscalationCard() {
       <p className="mt-2 text-sm leading-6 text-content">This may be life-threatening. Do not wait for more advice from the app.</p>
       <a
         href="tel:112"
-        className="mt-4 inline-flex h-10 items-center gap-2 rounded-lg bg-severity-red px-4 text-sm font-semibold leading-none text-surface hover:shadow-md active:shadow-none"
+        className="mt-4 inline-flex h-11 items-center gap-2 rounded-lg bg-severity-red px-4 text-sm font-semibold leading-none text-surface hover:shadow-md active:shadow-none"
       >
         <Icon name="call" className="!text-xl" />
         Call 112 now

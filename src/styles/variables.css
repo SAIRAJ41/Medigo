@@ -10,7 +10,12 @@
   --color-accent: #B9D5E8;
   --color-border: #D5E1EA;
 
-  /* Severity (reserved for badges, the donut chart and the Red - High card.
+  /* Soft fills: icon badges, empty states, help cards. Never text, never severity. */
+  --color-soft-blue: #C5DCEB;
+  --color-sage: #B8CDB9;
+  --color-warm-cream: #F1EBDD;
+
+  /* Severity (reserved for badges, the severity bars, the Red - High card and the 112 chip.
      Exception: --color-severity-red also for form error text and invalid-input borders, never buttons.) */
   --color-severity-red: #C62828;
   --color-severity-red-tint: #FDECEA;

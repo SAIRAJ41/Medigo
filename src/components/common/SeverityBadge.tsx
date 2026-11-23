@@ -23,17 +23,21 @@ interface Props {
   color: SeverityColor;
   level: SeverityLevel;
   variant?: 'tint' | 'solid';
+  /** sm: 24 px tall, for dense lists such as the chat history panel. */
+  size?: 'md' | 'sm';
   className?: string;
 }
 
 /** Always shows an icon AND a text label such as "Red - High". Fixed 32 px height like every chip. */
-export function SeverityBadge({ color, level, variant = 'tint', className = '' }: Props) {
+export function SeverityBadge({ color, level, variant = 'tint', size = 'md', className = '' }: Props) {
   const style = variant === 'solid' ? SOLID[color] : TINT[color];
   return (
     <span
-      className={`inline-flex h-8 items-center gap-2 whitespace-nowrap rounded-full border px-3 text-xs font-semibold leading-none ${style} ${className}`}
+      className={`inline-flex items-center whitespace-nowrap rounded-full border font-semibold leading-none ${
+        size === 'sm' ? 'h-6 gap-1 px-2 text-[11px]' : 'h-8 gap-2 px-3 text-xs'
+      } ${style} ${className}`}
     >
-      <Icon name={ICON[color]} className="!text-base" />
+      <Icon name={ICON[color]} className={size === 'sm' ? '!text-sm' : '!text-base'} />
       {getSeverityLabel({ severityColor: color, severityLevel: level })}
     </span>
   );

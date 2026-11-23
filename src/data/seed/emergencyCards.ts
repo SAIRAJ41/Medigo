@@ -1,14 +1,20 @@
-import type { EmergencyCard } from '../types/EmergencyCard';
+import type { EmergencyCard } from '../../types/EmergencyCard';
 
 /**
- * DEMO knowledge base: 15 common conditions, one entry per condition (SPEC section 7).
- * severityGuidance holds the first-aid steps, one step per line.
+ * Seed knowledge base: 15 common conditions, one entry per condition (SPEC section 7).
+ * Copied into the Dexie `emergencyCards` table on first run.
+ * severityGuidance holds the first-aid steps, one step per line. keywords are extra words people use (offline matching).
+ * severityColor / severityLevel / seekFacility are the default rating for the condition (offline replies, sample history).
  * General first-aid wording for demonstration. Have it reviewed by a medical professional before real use.
  */
-export const mockEmergencyCards: EmergencyCard[] = [
+export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 1,
     conditionName: 'Burns',
+    keywords: ['burn', 'burned', 'burnt', 'scald', 'scalded', 'hot', 'water', 'fire', 'blister', 'oil', 'steam'],
+    severityColor: 'YELLOW',
+    severityLevel: 'MEDIUM',
+    seekFacility: false,
     severityGuidance: [
       'Cool the burn under clean running water for 10 to 20 minutes.',
       'Remove rings, watches or tight items near the area before swelling starts.',
@@ -20,6 +26,10 @@ export const mockEmergencyCards: EmergencyCard[] = [
   {
     cardId: 2,
     conditionName: 'Severe bleeding',
+    keywords: ['bleeding', 'bleed', 'blood', 'cut', 'wound', 'gash', 'stab', 'puncture', 'nail'],
+    severityColor: 'RED',
+    severityLevel: 'HIGH',
+    seekFacility: true,
     severityGuidance: [
       'Press firmly on the wound with a clean cloth and keep pressing.',
       'If blood soaks through, add more cloth on top. Do not remove the first one.',
@@ -31,6 +41,10 @@ export const mockEmergencyCards: EmergencyCard[] = [
   {
     cardId: 3,
     conditionName: 'Choking',
+    keywords: ['choking', 'choke', 'choked', 'swallowed', 'throat', 'stuck', 'cough'],
+    severityColor: 'RED',
+    severityLevel: 'HIGH',
+    seekFacility: true,
     severityGuidance: [
       'If the person can cough or speak, encourage them to keep coughing.',
       'If they cannot breathe or speak, call 112 or ask someone to call.',
@@ -42,6 +56,10 @@ export const mockEmergencyCards: EmergencyCard[] = [
   {
     cardId: 4,
     conditionName: 'Fracture or sprain',
+    keywords: ['fracture', 'broken', 'bone', 'sprain', 'sprained', 'ankle', 'twisted', 'swelling', 'fall', 'fell', 'wrist'],
+    severityColor: 'YELLOW',
+    severityLevel: 'MEDIUM',
+    seekFacility: true,
     severityGuidance: [
       'Keep the injured part still. Do not try to straighten it.',
       'Support it in the position found using padding, a sling or a splint.',
@@ -53,6 +71,10 @@ export const mockEmergencyCards: EmergencyCard[] = [
   {
     cardId: 5,
     conditionName: 'Snakebite',
+    keywords: ['snake', 'snakebite', 'bitten', 'fang', 'venom'],
+    severityColor: 'RED',
+    severityLevel: 'HIGH',
+    seekFacility: true,
     severityGuidance: [
       'Keep the person calm and as still as possible. Movement spreads venom faster.',
       'Call 112 and get to a hospital with antivenom urgently.',
@@ -64,6 +86,10 @@ export const mockEmergencyCards: EmergencyCard[] = [
   {
     cardId: 6,
     conditionName: 'Fever',
+    keywords: ['fever', 'temperature', 'chills', 'shivering'],
+    severityColor: 'YELLOW',
+    severityLevel: 'LOW',
+    seekFacility: false,
     severityGuidance: [
       'Rest and drink plenty of fluids.',
       'Dress lightly and keep the room comfortably cool. Sponge with lukewarm water if uncomfortable.',
@@ -75,6 +101,10 @@ export const mockEmergencyCards: EmergencyCard[] = [
   {
     cardId: 7,
     conditionName: 'Heat stroke',
+    keywords: ['heat', 'sun', 'sunstroke', 'dehydrated', 'hot', 'weak'],
+    severityColor: 'RED',
+    severityLevel: 'HIGH',
+    seekFacility: true,
     severityGuidance: [
       'Call 112. Heat stroke is an emergency.',
       'Move the person to a cool, shaded place and remove extra clothing.',
@@ -86,6 +116,10 @@ export const mockEmergencyCards: EmergencyCard[] = [
   {
     cardId: 8,
     conditionName: 'Poisoning',
+    keywords: ['poison', 'poisoned', 'swallowed', 'drank', 'pesticide', 'chemical', 'kerosene', 'overdose'],
+    severityColor: 'RED',
+    severityLevel: 'HIGH',
+    seekFacility: true,
     severityGuidance: [
       'Call 112 or a poison information centre straight away.',
       'Do not make the person vomit and do not give anything to drink unless told to.',
@@ -97,6 +131,10 @@ export const mockEmergencyCards: EmergencyCard[] = [
   {
     cardId: 9,
     conditionName: 'Animal bite',
+    keywords: ['dog', 'bite', 'bitten', 'animal', 'monkey', 'cat', 'rabies', 'scratch', 'stray'],
+    severityColor: 'YELLOW',
+    severityLevel: 'HIGH',
+    seekFacility: true,
     severityGuidance: [
       'Wash the wound with soap and clean running water for at least 15 minutes.',
       'Cover with a clean dressing. Do not apply chilli, turmeric or other home remedies.',
@@ -108,6 +146,10 @@ export const mockEmergencyCards: EmergencyCard[] = [
   {
     cardId: 10,
     conditionName: 'Fainting',
+    keywords: ['faint', 'fainted', 'unconscious', 'dizzy', 'collapsed', 'passed'],
+    severityColor: 'YELLOW',
+    severityLevel: 'MEDIUM',
+    seekFacility: false,
     severityGuidance: [
       'Lay the person flat on their back and raise their legs about 30 cm.',
       'Loosen tight clothing and make sure they have fresh air.',
@@ -119,6 +161,10 @@ export const mockEmergencyCards: EmergencyCard[] = [
   {
     cardId: 11,
     conditionName: 'Nosebleed',
+    keywords: ['nose', 'nosebleed'],
+    severityColor: 'GREEN',
+    severityLevel: 'LOW',
+    seekFacility: false,
     severityGuidance: [
       'Sit upright and lean slightly forward. Do not tilt the head back.',
       'Pinch the soft part of the nose firmly for 10 minutes without releasing.',
@@ -129,6 +175,10 @@ export const mockEmergencyCards: EmergencyCard[] = [
   {
     cardId: 12,
     conditionName: 'Eye injury',
+    keywords: ['eye', 'eyes', 'dust', 'splash', 'vision'],
+    severityColor: 'YELLOW',
+    severityLevel: 'MEDIUM',
+    seekFacility: true,
     severityGuidance: [
       'Do not rub the eye.',
       'For chemicals or dust, rinse with clean water for at least 15 minutes, holding the eyelids open.',
@@ -139,6 +189,10 @@ export const mockEmergencyCards: EmergencyCard[] = [
   {
     cardId: 13,
     conditionName: 'Electric shock',
+    keywords: ['electric', 'shock', 'electrocuted', 'current', 'wire', 'socket'],
+    severityColor: 'RED',
+    severityLevel: 'HIGH',
+    seekFacility: true,
     severityGuidance: [
       'Do not touch the person until the power is switched off at the main switch.',
       'If you cannot switch off, push the source away with a dry wooden stick. Stand on dry material.',
@@ -150,6 +204,10 @@ export const mockEmergencyCards: EmergencyCard[] = [
   {
     cardId: 14,
     conditionName: 'Drowning',
+    keywords: ['drown', 'drowning', 'drowned', 'pool', 'river', 'well', 'pond'],
+    severityColor: 'RED',
+    severityLevel: 'HIGH',
+    seekFacility: true,
     severityGuidance: [
       'Call 112 or shout for help. Do not put yourself in danger. Reach with a pole or throw a rope or float.',
       'Once out of the water, check if the person is breathing.',
@@ -161,6 +219,10 @@ export const mockEmergencyCards: EmergencyCard[] = [
   {
     cardId: 15,
     conditionName: 'Insect sting',
+    keywords: ['sting', 'stung', 'bee', 'wasp', 'insect', 'hornet', 'scorpion'],
+    severityColor: 'GREEN',
+    severityLevel: 'LOW',
+    seekFacility: false,
     severityGuidance: [
       'Scrape out any visible sting sideways with a card or fingernail. Do not squeeze it.',
       'Wash the area and apply a cold pack wrapped in cloth.',

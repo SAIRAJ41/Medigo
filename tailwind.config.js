@@ -10,6 +10,7 @@ export default {
         content: { DEFAULT: 'var(--color-text)', muted: 'var(--color-text-muted)' },
         accent: 'var(--color-accent)',
         border: 'var(--color-border)',
+        soft: { blue: 'var(--color-soft-blue)', sage: 'var(--color-sage)', cream: 'var(--color-warm-cream)' },
         severity: {
           red: 'var(--color-severity-red)',
           'red-tint': 'var(--color-severity-red-tint)',

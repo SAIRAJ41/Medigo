@@ -10,14 +10,16 @@ interface Props {
   outcome: TriageOutcome;
   onFindFacility: () => void;
   onSave: () => Promise<void>;
+  /** True when this result is already in history (reopened conversation). */
+  initiallySaved?: boolean;
 }
 
-const NOTICE = 'flex items-start gap-2 rounded-xl bg-accent p-4 text-sm leading-5 text-content';
+const NOTICE = 'flex items-start gap-2 rounded-xl border border-border bg-soft-cream p-4 text-sm leading-5 text-content';
 
 /** Assistant reply: badge, condition, numbered steps, two actions, disclaimer. */
-export function TriageResultCard({ outcome, onFindFacility, onSave }: Props) {
+export function TriageResultCard({ outcome, onFindFacility, onSave, initiallySaved = false }: Props) {
   const { result, status } = outcome;
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved] = useState(initiallySaved);
   const critical = result.severityColor === 'RED' && result.severityLevel === 'HIGH';
 
   const save = async () => {
@@ -42,13 +44,13 @@ export function TriageResultCard({ outcome, onFindFacility, onSave }: Props) {
       )}
       {critical && <EscalationCard />}
 
-      <article className="rounded-xl border border-border bg-surface p-6 shadow-sm">
+      <article className="rounded-xl border border-border bg-surface p-6">
         <div className="flex flex-wrap items-center gap-3">
           <SeverityBadge color={result.severityColor} level={result.severityLevel} />
           <h3 className="text-lg font-bold leading-6 text-content">{result.condition}</h3>
         </div>
 
-        <div className="mt-4 rounded-xl border border-border bg-page p-4">
+        <div className="mt-4 rounded-lg bg-surface-tint p-4">
           <h4 className="flex items-center gap-2 text-sm font-semibold leading-5 text-content">
             <Icon name="medical_services" className="!text-xl text-primary-hover" />
             First-aid steps

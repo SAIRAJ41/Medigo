@@ -2,7 +2,7 @@ import { Icon } from '../common/Icon';
 
 export function EmergencyNotice() {
   return (
-    <div className="flex items-start gap-2 rounded-xl border border-border bg-surface-tint p-6 text-sm leading-5 text-content">
+    <div className="flex items-start gap-2 rounded-xl border border-border bg-surface p-6 text-sm leading-5 text-content">
       <Icon name="info" className="!text-xl text-primary-hover" />
       <p>
         For a life-threatening emergency,{' '}

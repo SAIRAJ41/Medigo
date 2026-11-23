@@ -13,7 +13,7 @@ const ROWS: { color: SeverityColor; label: string; icon: string; iconClass: stri
 const checks = (n: number) => `${n} ${n === 1 ? 'check' : 'checks'}`;
 
 /**
- * Severity breakdown as three horizontal bars (Red, Yellow, Green) with count and percentage.
+ * Severity breakdown as three horizontal bars (Red, Yellow, Green): label and count on one line, bar below.
  * The name is kept from the earlier donut chart so callers do not change.
  */
 export function SeverityPieChart({ counts }: { counts: Record<SeverityColor, number> }) {
@@ -29,24 +29,27 @@ export function SeverityPieChart({ counts }: { counts: Record<SeverityColor, num
   const summary = `Severity breakdown of ${checks(total)}: Red ${counts.RED}, Yellow ${counts.YELLOW}, Green ${counts.GREEN}.`;
 
   return (
-    <div role="img" aria-label={summary} className="flex flex-1 flex-col justify-evenly gap-4">
+    <div role="img" aria-label={summary} className="space-y-6">
       {ROWS.map((r) => {
         const n = counts[r.color];
         const pct = total ? (n / total) * 100 : 0;
         return (
-          <div key={r.color} className="grid grid-cols-[6rem_minmax(0,1fr)_5rem_3rem] items-center gap-4 text-sm">
-            <span className="flex items-center gap-2 font-semibold text-content">
-              <Icon name={r.icon} className={`!text-xl ${r.iconClass}`} />
-              {r.label}
-            </span>
-            <span className="h-3 overflow-hidden rounded-full bg-border">
+          <div key={r.color}>
+            <div className="flex items-center justify-between gap-3 text-sm leading-5">
+              <span className="flex items-center gap-2 font-semibold text-content">
+                <Icon name={r.icon} className={`!text-xl ${r.iconClass}`} />
+                {r.label}
+              </span>
+              <span className="tabular-nums text-content">
+                {checks(n)} <span className="ml-1 font-semibold">{Math.round(pct)}%</span>
+              </span>
+            </div>
+            <span className="mt-2 block h-2.5 overflow-hidden rounded-full bg-surface-tint">
               <span
                 className={`block h-full rounded-full transition-[width] duration-300 ease-out motion-reduce:transition-none ${r.bar}`}
                 style={{ width: grown ? `${pct}%` : '0%', minWidth: n > 0 ? 4 : 0 }}
               />
             </span>
-            <span className="text-right tabular-nums text-content">{checks(n)}</span>
-            <span className="text-right font-semibold tabular-nums text-content">{Math.round(pct)}%</span>
           </div>
         );
       })}

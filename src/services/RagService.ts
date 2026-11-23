@@ -1,28 +1,9 @@
 import type { IEmergencyCardRepository } from '../data/EmergencyCardRepository';
 import type { EmergencyCard } from '../types/EmergencyCard';
 
-/** Extra words people use for each condition. Keeps matching simple and fully offline. */
-const KEYWORDS: Record<string, string[]> = {
-  Burns: ['burn', 'burned', 'burnt', 'scald', 'scalded', 'hot', 'water', 'fire', 'blister', 'oil', 'steam'],
-  'Severe bleeding': ['bleeding', 'bleed', 'blood', 'cut', 'wound', 'gash', 'stab', 'puncture', 'nail'],
-  Choking: ['choking', 'choke', 'choked', 'swallowed', 'throat', 'stuck', 'cough'],
-  'Fracture or sprain': ['fracture', 'broken', 'bone', 'sprain', 'sprained', 'ankle', 'twisted', 'swelling', 'fall', 'fell', 'wrist'],
-  Snakebite: ['snake', 'snakebite', 'bitten', 'fang', 'venom'],
-  Fever: ['fever', 'temperature', 'chills', 'shivering'],
-  'Heat stroke': ['heat', 'sun', 'sunstroke', 'dehydrated', 'hot', 'weak'],
-  Poisoning: ['poison', 'poisoned', 'swallowed', 'drank', 'pesticide', 'chemical', 'kerosene', 'overdose'],
-  'Animal bite': ['dog', 'bite', 'bitten', 'animal', 'monkey', 'cat', 'rabies', 'scratch', 'stray'],
-  Fainting: ['faint', 'fainted', 'unconscious', 'dizzy', 'collapsed', 'passed'],
-  Nosebleed: ['nose', 'nosebleed'],
-  'Eye injury': ['eye', 'eyes', 'dust', 'splash', 'vision'],
-  'Electric shock': ['electric', 'shock', 'electrocuted', 'current', 'wire', 'socket'],
-  Drowning: ['drown', 'drowning', 'drowned', 'pool', 'river', 'well', 'pond'],
-  'Insect sting': ['sting', 'stung', 'bee', 'wasp', 'insect', 'hornet', 'scorpion'],
-};
-
 const tokenize = (text: string) => Array.from(new Set(text.toLowerCase().match(/[a-z]+/g) ?? []));
 
-/** Searches the local knowledge base. Works offline. */
+/** Searches the local knowledge base (Dexie emergencyCards: condition name + keywords). Works offline. */
 export class RagService {
   private cards: EmergencyCard[] = [];
   private loaded = false;
@@ -44,7 +25,7 @@ export class RagService {
     if (words.length === 0) return [];
     return this.cards
       .map((card) => {
-        const vocab = new Set([...tokenize(card.conditionName), ...(KEYWORDS[card.conditionName] ?? [])]);
+        const vocab = new Set([...tokenize(card.conditionName), ...(card.keywords ?? [])]);
         const score = words.filter((w) => vocab.has(w)).length;
         return { card, score };
       })

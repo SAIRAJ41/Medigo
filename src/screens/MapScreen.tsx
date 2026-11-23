@@ -48,7 +48,7 @@ export function MapScreen() {
 
   if (all.length === 0) {
     return (
-      <div className="mx-auto max-w-[1200px] px-4 py-8 md:px-6">
+      <div className="mx-auto max-w-[1200px] px-4 py-8 md:px-8">
         <div className="rounded-xl border border-border bg-surface p-10 text-center text-content">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-surface-tint">
             <Icon name="local_hospital" className="text-primary-hover" />
@@ -61,20 +61,20 @@ export function MapScreen() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] space-y-6 px-4 py-8 md:px-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
+    <div className="mx-auto w-full max-w-[1200px] space-y-6 px-4 py-8 md:px-8">
+      <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold leading-8 text-content">Nearest Facility</h1>
+          <h1 className="text-3xl font-bold leading-10 text-content">Nearest Facility</h1>
           <p className="mt-1 text-sm leading-5 text-content-muted">Medical centres near you</p>
         </div>
         {state === 'locating' && (
-          <span className="inline-flex h-8 items-center gap-2 rounded-full bg-surface-tint px-3 text-xs font-semibold leading-none text-content" role="status">
+          <span className="inline-flex h-8 items-center gap-2 rounded-lg border border-border bg-surface px-3 text-xs font-semibold leading-none text-content" role="status">
             <Icon name="location_searching" className="!text-base pulse-dot" />
             Finding your location…
           </span>
         )}
         {state === 'found' && (
-          <span className="inline-flex h-8 items-center gap-2 rounded-full bg-accent px-3 text-xs font-semibold leading-none text-content">
+          <span className="inline-flex h-8 items-center gap-2 rounded-lg bg-soft-blue px-3 text-xs font-semibold leading-none text-content">
             <Icon name="my_location" className="!text-base" />
             Location found
           </span>
@@ -82,7 +82,7 @@ export function MapScreen() {
       </div>
 
       {(state === 'denied' || state === 'failed') && (
-        <div role="status" className="flex flex-wrap items-center gap-3 rounded-xl bg-accent p-4 text-sm leading-5 text-content">
+        <div role="status" className="flex flex-wrap items-center gap-3 rounded-xl border border-border bg-soft-cream p-4 text-sm leading-5 text-content">
           <span className="flex min-w-0 flex-1 items-center gap-2">
             <Icon name="location_off" className="!text-xl" />
             <span>
@@ -119,8 +119,8 @@ export function MapScreen() {
 /** Placeholder blocks that match the map layout while facilities load. */
 function MapSkeleton() {
   return (
-    <div className="mx-auto w-full max-w-[1200px] space-y-6 px-4 py-8 md:px-6" aria-busy="true" aria-label="Loading facilities">
-      <div className="space-y-2 border-b border-border pb-4">
+    <div className="mx-auto w-full max-w-[1200px] space-y-6 px-4 py-8 md:px-8" aria-busy="true" aria-label="Loading facilities">
+      <div className="space-y-2">
         <div className="skeleton h-8 w-56" />
         <div className="skeleton h-5 w-48" />
       </div>

@@ -10,7 +10,7 @@ interface Props {
   onSelect: (id: number) => void;
 }
 
-const ACTION = 'inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold leading-none';
+const ACTION = 'inline-flex h-11 items-center gap-2 rounded-lg px-4 text-sm font-semibold leading-none';
 
 /** Facility cards. Distances and the Nearest chip appear only when the position is known. */
 export function FacilityList({ facilities, hasPosition, nearestId, selectedId, onSelect }: Props) {
@@ -24,7 +24,7 @@ export function FacilityList({ facilities, hasPosition, nearestId, selectedId, o
             <div
               onClick={() => onSelect(f.hospitalId)}
               className={`cursor-pointer rounded-xl border p-6 transition-colors duration-150 hover:border-content-muted ${
-                nearest ? 'bg-surface-tint' : 'bg-surface'
+                'bg-surface'
               } ${selected ? 'border-primary-hover ring-1 ring-primary-hover' : 'border-border'}`}
             >
               <div className="flex items-start gap-3">
@@ -33,7 +33,7 @@ export function FacilityList({ facilities, hasPosition, nearestId, selectedId, o
                 </div>
                 <div className="min-w-0 flex-1">
                   {nearest && (
-                    <span className="mb-2 inline-flex h-6 items-center rounded-full bg-accent px-3 text-xs font-semibold leading-none text-content">
+                    <span className="mb-2 inline-flex h-6 items-center rounded-md bg-soft-blue px-3 text-xs font-semibold leading-none text-content">
                       Nearest
                     </span>
                   )}
@@ -49,7 +49,7 @@ export function FacilityList({ facilities, hasPosition, nearestId, selectedId, o
                   <a
                     href={`tel:${f.phone}`}
                     onClick={(e) => e.stopPropagation()}
-                    className={`${ACTION} border border-content-muted bg-surface text-content hover:bg-surface-tint active:bg-accent`}
+                    className={`${ACTION} border border-border bg-surface text-content hover:border-content-muted hover:bg-page active:bg-surface-tint`}
                   >
                     <Icon name="call" className="!text-xl" />
                     Call
