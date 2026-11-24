@@ -80,7 +80,7 @@ Rules:
 
 Seed data:
 - `emergency_cards`: 41 common first-aid conditions (burns, bleeding, choking, choking in a baby, fracture, snakebite, fever, heat stroke, poisoning, CPR, stroke, seizure, etc.), one entry per condition. A knowledge base version in the `meta` table reseeds only this store when the cards change.
-- `hospitals`: small sample list of Goa facilities. To be replaced later with a full dataset.
+- `hospitals`: draft list of ~80 Goa facilities (coordinates not field-verified, see docs/goa_health_facilities_draft.csv); reloaded when HOSPITALS_VERSION changes. To be replaced later with a verified OpenStreetMap extract.
 
 ## 8. Code structure (use these names)
 - Screens: AppShell, DashboardScreen, ChatScreen, MapScreen, LoginScreen, SignUpScreen, ProfileScreen

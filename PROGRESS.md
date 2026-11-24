@@ -30,3 +30,5 @@
 - Saved checks are not yet linked to a user account.
 - Real data layer (Dexie), PWA offline support, map tile caching, Capacitor Android wrapper.
 - Photo analysis is off by default (`ENABLE_IMAGES=false`); turn it on once the chosen model is confirmed to accept images.
+
+- Map data (24 Nov): hospitals seed grown from 6 sample entries to ~80 Goa facilities collected from public pages; coordinates are draft and not field-verified (confidence per row in docs/goa_health_facilities_draft.csv). HOSPITALS_VERSION in firstRun.ts reloads the table on devices.

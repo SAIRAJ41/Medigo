@@ -8,6 +8,8 @@ const DEMO_SEEDED = 'demoAccountsSeeded';
 /** Bump when seedEmergencyCards changes, so devices that already have cards get the new set. */
 export const KB_VERSION = '5';
 const KB_VERSION_KEY = 'knowledgeBaseVersion';
+export const HOSPITALS_VERSION = '2';
+const HOSPITALS_VERSION_KEY = 'hospitalsVersion';
 /** Where accounts lived before Dexie. Read once by the migration below, then removed. */
 const LEGACY_USERS_KEY = 'medigo.users';
 
@@ -51,11 +53,24 @@ async function syncKnowledgeBase(d: LocalDatabase) {
   });
 }
 
+/**
+ * Replaces the hospitals list when HOSPITALS_VERSION changes (or on first run). Nothing else stores a hospitalId
+ * (the map reads the table directly), so a replace is safe.
+ */
+async function syncHospitals(d: LocalDatabase) {
+  if ((await d.getMeta(HOSPITALS_VERSION_KEY)) === HOSPITALS_VERSION) return;
+  await d.transaction('rw', d.hospitals, d.meta, async () => {
+    await d.hospitals.clear();
+    await d.hospitals.bulkAdd(seedHospitals);
+    await d.meta.put({ key: HOSPITALS_VERSION_KEY, value: HOSPITALS_VERSION });
+  });
+}
+
 /** Runs on every start; each step only does work the first time (or when the knowledge base version changes). */
 export async function runFirstRunJobs(d: LocalDatabase): Promise<void> {
   // Reference data (shared by all accounts).
   await syncKnowledgeBase(d);
-  if ((await d.hospitals.count()) === 0) await d.hospitals.bulkAdd(seedHospitals);
+  await syncHospitals(d);
 
   await migrateLegacyUsers(d);
 
