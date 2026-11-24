@@ -17,6 +17,11 @@
   - New Settings, Security and Get Help screens. `ICaseRepository.clearAll()` added (only the mock implements it today). Change password moved from Profile to Security (shared `ChangePasswordCard`, inline success message).
 
 - **Knowledge base v2**: 40 first-aid cards (was 15) in `src/data/seed/emergencyCards.ts`, own wording with a source line per card. `KB_VERSION` in `src/data/seed/firstRun.ts` reseeds only `emergencyCards` when the cards change. Retrieval eval in `scripts/rag-eval/` (102 labelled + 8 non-medical queries). Cards still need review by a medical professional.
+  - KB v4 (`KB_VERSION` '4'): generic keywords removed (bit, well, cough, passed, swelling, oil, nail, knocked, sar, redness) and specific ones added for the known misses. Eval: top-1 99/102, top-3 100/102, 0/8 false positives, 13/13 regression checks. 10 held-out queries (written before tuning, never tuned on): top-1 4/10, top-3 6/10.
+  - Not fixed: "fell into the village well" (no safe keyword after dropping 'well'), stroke described only as "can't move arm and leg", "plastic bag over his head" ranks Head injury first. 'sugar' not added (clashes with the non-medical "buy sugar" check). 'roof', 'plastic', 'lip', 'pet' can match on their own.
+  - `docs/KNOWLEDGE_BASE_REVIEW.md`: all 40 cards with flags for a medical reviewer (doses in Heart attack / Asthma, adult-only CPR and choking steps, pregnancy, snakebite, seizure).
+  - `server/scripts/smoke-test.mjs` now sends the top 3 RagService cards like the app, 27 cases with expected severity (3 follow-ups with history); exits 1 if a RED case comes back GREEN. Before-prompt results: `docs/SMOKE_RESULTS_BEFORE_PROMPT.md`.
+  - Not done yet: prompt worked examples (step E), pending a decision after the smoke results.
 
 ## Later
 - **Server auth** replaces local accounts: a server-backed IAuthService and IUserRepository, real sessions and server-side lockouts. The local version is convenience only, not real security.

@@ -8,7 +8,7 @@
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
     "typecheck": "tsc --noEmit",
-    "smoke": "node scripts/smoke-test.mjs"
+    "smoke": "node --experimental-transform-types --no-warnings scripts/smoke-test.mjs"
   },
   "engines": {
     "node": ">=20"
