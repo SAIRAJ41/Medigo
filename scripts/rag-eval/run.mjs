@@ -13,10 +13,29 @@ const rag = new RagService({ getAll: async () => seedEmergencyCards }, 3);
 let top1 = 0, top3 = 0, answerable = 0, wrongSilence = 0, falsePositive = 0, shouldBeEmpty = 0;
 const misses = [];
 const top1Misses = [];
+// Regression checks: "reject" = cards that must not appear, "first" = expected card must rank first.
+const regFails = [];
+let regTotal = 0;
+// Held-out queries: written before tuning, never tuned on. Scored separately.
+const held = { n: 0, top1: 0, top3: 0, misses: [] };
 
-for (const { q, expect, note } of queries) {
+for (const { q, expect = [], note, reject, first, regression, heldout } of queries) {
   if (expect[0] === '*') continue; // section marker line in queries.json
   const names = (await rag.search(q)).map((c) => c.conditionName);
+  if (regression) {
+    regTotal++;
+    const bad = (reject ?? []).filter((r) => names.includes(r));
+    const notFirst = first && !expect.includes(names[0]);
+    if (bad.length || notFirst) regFails.push({ q, got: names, why: bad.length ? `contains ${bad.join(', ')}` : `expected ${expect.join(' | ')} first` });
+    continue;
+  }
+  if (heldout) {
+    held.n++;
+    if (expect.includes(names[0])) held.top1++;
+    if (names.some((n) => expect.includes(n))) held.top3++;
+    else held.misses.push({ q, expect, got: names, note });
+    continue;
+  }
   if (expect.length === 0) {
     shouldBeEmpty++;
     if (names.length > 0) { falsePositive++; misses.push({ q, expect: '(nothing)', got: names, note }); }
@@ -35,6 +54,10 @@ console.log(`Top-1 hit:            ${pct(top1, answerable)}`);
 console.log(`Top-3 hit (recall):   ${pct(top3, answerable)}`);
 console.log(`Empty on real case:   ${pct(wrongSilence, answerable)}`);
 console.log(`False positives:      ${pct(falsePositive, shouldBeEmpty)}  (non-medical text that still matched)`);
+console.log(`Regression checks:    ${regTotal - regFails.length}/${regTotal} pass`);
+console.log(`Held-out top-1:       ${pct(held.top1, held.n)}`);
+console.log(`Held-out top-3:       ${pct(held.top3, held.n)}`);
+for (const f of regFails) console.log(`  REGRESSION FAIL "${f.q}": ${f.why} (got: ${f.got.join(', ') || 'nothing'})`);
 if (misses.length) {
   console.log('\nMisses:');
   for (const m of misses) console.log(`- "${m.q}"\n    expected: ${[].concat(m.expect).join(' | ')}\n    got:      ${m.got.length ? m.got.join(', ') : '(nothing)'}${m.note ? `\n    note:     ${m.note}` : ''}`);
@@ -43,3 +66,8 @@ if (top1Misses.length) {
   console.log('\nRight card in top 3 but not first:');
   for (const m of top1Misses) console.log(`- "${m.q}"\n    expected: ${m.expect.join(' | ')}\n    got:      ${m.got.join(', ')}`);
 }
+if (held.misses.length) {
+  console.log('\nHeld-out misses (not tuned on, reported only):');
+  for (const m of held.misses) console.log(`- "${m.q}"\n    expected: ${m.expect.join(' | ')}\n    got:      ${m.got.length ? m.got.join(', ') : '(nothing)'}`);
+}
+process.exitCode = regFails.length ? 1 : 0;

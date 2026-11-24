@@ -11,7 +11,8 @@ import type { EmergencyCard } from '../../types/EmergencyCard';
  * (not a quote and not a page citation).
  * General first-aid wording for demonstration. Have it reviewed by a medical professional before real use.
  *
- * Keyword tips: every keyword can match a card on its own, so avoid generic words (hot, water, fall, pain).
+ * Keyword tips: every keyword can match a card on its own, so avoid generic words (hot, water, fall, pain, bit, well,
+ * cough, swelling, passed). The regression checks in scripts/rag-eval/queries.json guard the known ones.
  * Words are lower-cased and lightly stemmed ("bleeding" -> "bleed"), so one form is usually enough.
  * Check changes with: node --experimental-transform-types --no-warnings scripts/rag-eval/run.mjs
  */
@@ -20,7 +21,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 1,
     conditionName: 'Burns',
-    keywords: ['burn', 'burned', 'burnt', 'scald', 'scalded', 'fire', 'blister', 'boiling', 'oil', 'steam'],
+    keywords: ['burn', 'burned', 'burnt', 'scald', 'scalded', 'fire', 'blister', 'boiling', 'steam'],
     severityColor: 'YELLOW',
     severityLevel: 'MEDIUM',
     seekFacility: false,
@@ -36,7 +37,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 2,
     conditionName: 'Severe bleeding',
-    keywords: ['bleeding', 'bleed', 'blood', 'cut', 'wound', 'gash', 'stab', 'puncture', 'nail'],
+    keywords: ['bleeding', 'bleed', 'blood', 'cut', 'wound', 'gash', 'stab', 'puncture'],
     severityColor: 'RED',
     severityLevel: 'HIGH',
     seekFacility: true,
@@ -52,7 +53,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 3,
     conditionName: 'Choking',
-    keywords: ['choking', 'choke', 'choked', 'swallowed', 'throat', 'cough'],
+    keywords: ['choking', 'choke', 'choked', 'swallowed', 'throat'],
     severityColor: 'RED',
     severityLevel: 'HIGH',
     seekFacility: true,
@@ -68,7 +69,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 4,
     conditionName: 'Fracture or sprain',
-    keywords: ['fracture', 'broken', 'bone', 'sprain', 'sprained', 'ankle', 'twisted', 'swelling', 'wrist'],
+    keywords: ['fracture', 'broken', 'bone', 'sprain', 'sprained', 'ankle', 'twisted', 'wrist'],
     severityColor: 'YELLOW',
     severityLevel: 'MEDIUM',
     seekFacility: true,
@@ -84,7 +85,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 5,
     conditionName: 'Snakebite',
-    keywords: ['snake', 'snakebite', 'bitten', 'bit', 'fang', 'venom', 'saanp'],
+    keywords: ['snake', 'snakebite', 'bitten', 'fang', 'venom', 'saanp'],
     severityColor: 'RED',
     severityLevel: 'HIGH',
     seekFacility: true,
@@ -164,7 +165,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 10,
     conditionName: 'Fainting',
-    keywords: ['faint', 'fainted', 'unconscious', 'dizzy', 'collapsed', 'passed'],
+    keywords: ['faint', 'fainted', 'unconscious', 'dizzy', 'collapsed', 'blackout', 'behosh'],
     severityColor: 'YELLOW',
     severityLevel: 'MEDIUM',
     seekFacility: false,
@@ -226,7 +227,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 14,
     conditionName: 'Drowning',
-    keywords: ['drown', 'drowning', 'drowned', 'pool', 'river', 'well', 'pond'],
+    keywords: ['drown', 'drowning', 'drowned', 'pool', 'river', 'pond', 'doob', 'dooba', 'kuan', 'kuwa'],
     severityColor: 'RED',
     severityLevel: 'HIGH',
     seekFacility: true,
@@ -373,7 +374,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 23,
     conditionName: 'Head injury',
-    keywords: ['concussion', 'skull', 'forehead', 'knocked', 'bump', 'helmet', 'sar'],
+    keywords: ['concussion', 'skull', 'forehead', 'bump', 'helmet'],
     severityColor: 'YELLOW',
     severityLevel: 'HIGH',
     seekFacility: true,
@@ -615,7 +616,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 38,
     conditionName: 'Minor burn',
-    keywords: ['sunburn', 'sunburnt', 'tawa', 'utensil', 'kettle', 'redness'],
+    keywords: ['sunburn', 'sunburnt', 'tawa', 'utensil', 'kettle'],
     severityColor: 'GREEN',
     severityLevel: 'LOW',
     seekFacility: false,

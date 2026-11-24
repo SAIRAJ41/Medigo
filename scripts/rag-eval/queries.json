@@ -112,5 +112,28 @@
   { "q": "my phone battery is dead", "expect": [], "note": "non-medical" },
   { "q": "the cricket match was a thriller", "expect": [], "note": "non-medical" },
   { "q": "I want to buy sugar and rice", "expect": [], "note": "non-medical" },
-  { "q": "remind me to call my mother", "expect": [], "note": "non-medical" }
+  { "q": "remind me to call my mother", "expect": [], "note": "non-medical" },
+
+  { "q": "------ regression checks: generic words must not pull in these cards ------", "expect": ["*"], "note": "section marker, skipped" },
+  {"q": "I feel a bit dizzy", "expect": ["Fainting"], "reject": ["Snakebite"], "regression": true},
+  {"q": "a bit of pain in my knee", "reject": ["Snakebite"], "regression": true},
+  {"q": "my tooth hurts a bit", "expect": ["Tooth or jaw injury"], "reject": ["Snakebite"], "regression": true},
+  {"q": "she bit her tongue during a fit", "expect": ["Seizure"], "first": true, "reject": ["Snakebite"], "regression": true},
+  {"q": "I am not feeling well", "reject": ["Drowning"], "regression": true, "note": "'well' removed from Drowning"},
+  {"q": "I have a cough and cold", "reject": ["Choking"], "regression": true, "note": "'cough' removed from Choking"},
+  {"q": "my grandfather passed away last year", "reject": ["Fainting"], "regression": true, "note": "'passed' removed from Fainting"},
+  {"q": "swelling on my face", "reject": ["Fracture or sprain"], "regression": true, "note": "'swelling' removed from Fracture"},
+  {"q": "sar dard ho raha hai", "reject": ["Head injury"], "regression": true, "note": "headache is not a head injury; 'sar' removed"},
+
+  { "q": "------ held-out: written before tuning, never tuned on ------", "expect": ["*"], "note": "section marker, skipped" },
+  {"q": "my brother fell down unconscious and isnt breathing", "expect": ["Cardiac arrest", "Fainting"], "heldout": true},
+  {"q": "dadi ko chakkar aa raha hai", "expect": ["Fainting"], "heldout": true, "note": "Hinglish: dizziness"},
+  {"q": "burnd my arm on the stove", "expect": ["Burns", "Minor burn"], "heldout": true, "note": "misspelling"},
+  {"q": "kid ate rat poison", "expect": ["Poisoning"], "heldout": true},
+  {"q": "my leg is bleding badly after a sickle cut", "expect": ["Severe bleeding"], "heldout": true, "note": "misspelling"},
+  {"q": "i think its a heart problem, left side chest is heavy", "expect": ["Heart attack"], "heldout": true, "note": "vague"},
+  {"q": "he is very hot to touch and talking nonsense", "expect": ["Fever", "Heat stroke"], "heldout": true, "note": "vague"},
+  {"q": "saap ne dasa", "expect": ["Snakebite"], "heldout": true, "note": "Hinglish, other spelling"},
+  {"q": "stung by bichu on hand", "expect": ["Scorpion sting"], "heldout": true, "note": "Hinglish mix"},
+  {"q": "baby swallowed a coin and is coughing", "expect": ["Choking"], "heldout": true}
 ]
