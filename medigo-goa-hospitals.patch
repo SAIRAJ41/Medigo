@@ -1,0 +1,323 @@
+From c77bdd18e007fcf03a081d148c8a842d874980f5 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Tue, 24 Nov 2026 16:18:52 +0000
+Subject: [PATCH] Map: ~80 draft Goa facilities, versioned hospitals reseed
+
+- seedHospitals grown from 6 samples to 80 Goa facilities collected from public pages (draft, not field-verified)
+- Excluded rows flagged CHECK, defence and port-trust facilities; four official facilities without coordinates keep a town-level position marked "(approx. location)"
+- Phone numbers only where clean in the official DHS list
+- firstRun: HOSPITALS_VERSION reloads the hospitals table when the list changes (nothing else stores a hospitalId)
+- docs/goa_health_facilities_draft.csv keeps source and confidence per row
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01LySrt3MdxnsvfXNsE9V7jF
+---
+ PROGRESS.md                          |   2 +
+ SPEC.md                              |   2 +-
+ docs/goa_health_facilities_draft.csv | 122 +++++++++++++++++++++++++++
+ src/data/seed/firstRun.ts            |  17 +++-
+ src/data/seed/hospitals.ts           |  97 +++++++++++++++++++--
+ 5 files changed, 230 insertions(+), 10 deletions(-)
+ create mode 100644 docs/goa_health_facilities_draft.csv
+
+diff --git a/PROGRESS.md b/PROGRESS.md
+index abfeb51..7be3443 100644
+--- a/PROGRESS.md
++++ b/PROGRESS.md
+@@ -30,3 +30,5 @@
+ - Saved checks are not yet linked to a user account.
+ - Real data layer (Dexie), PWA offline support, map tile caching, Capacitor Android wrapper.
+ - Photo analysis is off by default (`ENABLE_IMAGES=false`); turn it on once the chosen model is confirmed to accept images.
++
++- Map data (24 Nov): hospitals seed grown from 6 sample entries to ~80 Goa facilities collected from public pages; coordinates are draft and not field-verified (confidence per row in docs/goa_health_facilities_draft.csv). HOSPITALS_VERSION in firstRun.ts reloads the table on devices.
+diff --git a/SPEC.md b/SPEC.md
+index 08848ff..c4d4ab3 100644
+--- a/SPEC.md
++++ b/SPEC.md
+@@ -80,7 +80,7 @@ Rules:
+ 
+ Seed data:
+ - `emergency_cards`: 41 common first-aid conditions (burns, bleeding, choking, choking in a baby, fracture, snakebite, fever, heat stroke, poisoning, CPR, stroke, seizure, etc.), one entry per condition. A knowledge base version in the `meta` table reseeds only this store when the cards change.
+-- `hospitals`: small sample list of Goa facilities. To be replaced later with a full dataset.
++- `hospitals`: draft list of ~80 Goa facilities (coordinates not field-verified, see docs/goa_health_facilities_draft.csv); reloaded when HOSPITALS_VERSION changes. To be replaced later with a verified OpenStreetMap extract.
+ 
+ ## 8. Code structure (use these names)
+ - Screens: AppShell, DashboardScreen, ChatScreen, MapScreen, LoginScreen, SignUpScreen, ProfileScreen
+diff --git a/docs/goa_health_facilities_draft.csv b/docs/goa_health_facilities_draft.csv
+new file mode 100644
+index 0000000..5a71d7e
+--- /dev/null
++++ b/docs/goa_health_facilities_draft.csv
+@@ -0,0 +1,122 @@
++name,type,area,latitude,longitude,source,confidence,note
++PHC Aldona,government PHC,Aldona,15.5778149,73.862684,latlong.net Panaji hospitals list,MEDIUM,Name matches official DHS list
++Goa Medical College and Hospital,government tertiary,Bambolim,15.4637639,73.8584047,latlong.net Panaji hospitals list,MEDIUM,"Other sources differ by up to ~700 m (15.4578,73.8547); campus is large, check the casualty entrance"
++PHC Candolim,government PHC,Candolim,15.5149219,73.767963,latlong.net Panaji hospitals list,MEDIUM,Name matches official DHS list
++Manipal Hospital Goa,private multispeciality,Dona Paula,15.460187,73.813503,"Manipal Goa biomedical-waste annual report 2019 (GPS field); latlong.net 'Manipal Goa Cancer and General Hospital' 15.46012,73.81327 agrees",MEDIUM,Two sources agree within ~25 m
++Asilo Hospital / North Goa District Hospital,government district,Mapusa,15.589379,73.816574,"latlong.net Asilo page (matches Remanso 15.5902,73.8163 and UHC Mapusa 15.5899,73.8166)",MEDIUM,"Same site's list shows 73.8707, which is wrong (5 km east). Your current seed (15.5909,73.8082) is ~0.8 km west"
++Urban Health Centre Mapusa,government UHC,Mapusa,15.5898759,73.8166404,latlong.net Panaji hospitals list,MEDIUM,Name matches official DHS list
++PHC Marcaim,government PHC,Marcaim,15.4221431,73.9495915,latlong.net Panaji hospitals list,MEDIUM,Name matches official DHS list
++PHC Porvorim,government PHC,Porvorim,15.5266217,73.8339586,latlong.net Panaji hospitals list,MEDIUM,Name matches official DHS list
++Bicholim Hospital,hospital,Bicholim,15.5887969,73.9654913,latlong.net Panaji hospitals list,CHECK,"About 1.6 km east of Bicholim town centre, check"
++Sub-District Hospital Chicalim (Cottage Hospital),government sub-district,Chicalim,15.400293,73.832382,latlong.net Panaji hospitals list,CHECK,"Two list entries ('Cottage Hospital', 'Government Hospital') are 20 m apart; I assume both are Chicalim SDH"
++"District Hospital, Mapusa",government district,Mapusa,15.5969195,73.820305,latlong.net Panaji hospitals list,CHECK,"May be the new North Goa District Hospital building, or a duplicate of Asilo. Confirm which one is operating"
++Ramanso Hospital,private,Mapusa,15.6002205,73.8125335,latlong.net Panaji hospitals list,CHECK,Probably the same as Remanso Hospital above (spelling)
++Dr. Parulekar's Eye-Site,private eye,Margao area,15.3885854,73.8491146,latlong.net Panaji hospitals list,CHECK,"15.3886,73.8491 is nearer Vasco/Dabolim than Margao"
++Military Hospital (entry 1),defence,Panaji area,15.462762,73.8674027,latlong.net Panaji hospitals list,CHECK,"Restricted access, probably exclude from the public map"
++Military Hospital (entry 2),defence,Panaji area,15.4934917,73.8186608,latlong.net Panaji hospitals list,CHECK,"Restricted access, probably exclude from the public map"
++ESI Hospital (entry 1),government ESI,unknown,15.399329,73.826212,latlong.net Panaji hospitals list,CHECK,"ESI Margao is near Dr Rajendra Prasad Stadium (labour.goa.gov.in), so this is probably not Margao"
++ESI Hospital (entry 2),government ESI,unknown,15.38396,73.874072,latlong.net Panaji hospitals list,CHECK,Same problem as entry 1
++Vrundavan Hospital,private,unknown,15.480587,73.843159,latlong.net Panaji hospitals list,CHECK,"Coordinates are near Panaji, but another source puts Vrundavan Hospital in Margao. Verify before using"
++Dharwadkar Nursing Home,private nursing home,Anjuna/Dongarpur area,15.5437234,73.7722516,latlong.net Panaji hospitals list,LOW,
++Goa Dental College and Hospital,government dental,Bambolim,15.4659712,73.857501,latlong.net Panaji hospitals list,LOW,
++Institute of Psychiatry and Human Behaviour (IPHB),government mental health,Bambolim,15.4524044,73.8608402,latlong.net Panaji hospitals list,LOW,
++"Super Speciality Block, Goa Medical College",government tertiary,Bambolim,15.4622488,73.8549807,latlong.net Panaji hospitals list,LOW,
++Pediatrics Neuro Rehabilitation Centre,other,Bambolim area,15.4662014,73.8632619,latlong.net Panaji hospitals list,LOW,
++Dr Caeiro's Bicholim Polyclinic,private polyclinic,Bicholim,15.5882164,73.9444055,latlong.net Panaji hospitals list,LOW,
++Mahatme Nursing Home,private nursing home,Bicholim,15.6072918,73.9311242,latlong.net Panaji hospitals list,LOW,
++Mardolkar (clinic),private,Bicholim,15.590947,73.948326,latlong.net Panaji hospitals list,LOW,Name incomplete in source
++Subodh Maternity Home,private maternity,Bicholim,15.588492,73.94487,latlong.net Panaji hospitals list,LOW,
++Dr. Dukle's Hospital and Research Centre,private,Calangute/Saligao area,15.5282905,73.7649929,latlong.net Panaji hospitals list,LOW,
++Bosio Hospital,private,Candolim area,15.5200463,73.7707012,latlong.net Panaji hospitals list,LOW,
++Salgaocar Medical Research Centre (SMRC),private multispeciality,Chicalim,15.3946729,73.8363406,latlong.net Panaji hospitals list,LOW,
++"Adhar Hospital, Collan",private,Collem area,15.575819,73.9797105,latlong.net Panaji hospitals list,LOW,
++Dr. Dhulapkar's Hospital / Sushruti Hospital,private,Corlim/Ponda area,15.4972642,73.9320712,latlong.net Panaji hospitals list,LOW,"Two nearby entries (15.4972,73.9322); likely the same place"
++Anthony Gonsalves Hospital,private,Goa Velha/Santa Cruz,15.4686252,73.8482933,latlong.net Panaji hospitals list,LOW,
++Ankur Hospital (Dr Mopkar),private nursing home,Mapusa,15.592072,73.808984,latlong.net Panaji hospitals list,LOW,
++Bhagyoday Hospital,private,Mapusa,15.5944141,73.8116459,latlong.net Panaji hospitals list,LOW,
++Dr. Kolwalkar's Galaxy Hospital,private,Mapusa,15.6059423,73.8132935,latlong.net Panaji hospitals list,LOW,
++Dr. Olavo Ribeiro Hospital,private,Mapusa,15.5915292,73.8148437,latlong.net Panaji hospitals list,LOW,
++Gauns Child Care Hospital,private paediatric,Mapusa,15.599969,73.8111929,latlong.net Panaji hospitals list,LOW,
++Holy Cross General Remanso Hospital,private,Mapusa,15.5902147,73.816286,latlong.net Panaji hospitals list,LOW,
++Vision Hospital Emergency Complex,private emergency,Mapusa,15.6049299,73.8202808,latlong.net Panaji hospitals list,LOW,
++Vision Multispeciality Hospital,private multispeciality,Mapusa,15.6040397,73.8200726,latlong.net Panaji hospitals list,LOW,
++Vrundavan Shalby Hospital,private multispeciality,Mapusa,15.603647,73.8241743,latlong.net Panaji hospitals list,LOW,
++"Jesus, Mary and Joseph (JMJ) Hospital",private,Mapusa/Saligao area,15.5413202,73.822747,latlong.net Panaji hospitals list,LOW,
++Marwahi Hospital,private,Mapusa/Sangolda,15.5694164,73.8066968,latlong.net Panaji hospitals list,LOW,
++Chaitanya Mental Health Care Centre,private mental health,North Goa,15.619176,73.839756,latlong.net Panaji hospitals list,LOW,
++Healthway Hospitals (Old Goa super speciality),private multispeciality,Old Goa,15.4856998,73.9108806,latlong.net Panaji hospitals list,LOW,
++CMM Hospital,private,Panaji,15.493412,73.826491,latlong.net Panaji hospitals list,LOW,
++Dr. Ajit Kamat Hospital,private,Panaji,15.487352,73.812367,latlong.net Panaji hospitals list,LOW,
++Dr. Parab's Hospital,private,Panaji,15.477488,73.821525,latlong.net Panaji hospitals list,LOW,
++Dr. Rajadhyaksha Hospital,private,Panaji,15.5004212,73.8287032,latlong.net Panaji hospitals list,LOW,
++Ghanshyam Govind Kamat Memorial Hospital,private,Panaji,15.4905205,73.8324085,latlong.net Panaji hospitals list,LOW,
++Healthway Hospital (Fontainhas),private multispeciality,Panaji,15.4908487,73.8278326,latlong.net Panaji hospitals list,LOW,"A second Healthway entry is at 15.4940615,73.8315736; one of them may be wrong"
++Indira Smruti Raikar Nursing Home,private nursing home,Panaji,15.4801333,73.8144089,latlong.net Panaji hospitals list,LOW,
++Kaisare Eye and Dental Hospital,private eye/dental,Panaji,15.4905935,73.8325607,latlong.net Panaji hospitals list,LOW,
++Kaisares Hospital,private,Panaji,15.4903535,73.833051,latlong.net Panaji hospitals list,LOW,
++Noble Super Speciality Eye Hospital,private eye,Panaji,15.499722,73.822989,latlong.net Panaji hospitals list,LOW,
++TB and Chest Disease Hospital (Panaji),government TB,Panaji,15.4835919,73.8233319,latlong.net Panaji hospitals list,LOW,
++Trinity Health Care and Medical Research,private,Panaji,15.484842,73.8115837,latlong.net Panaji hospitals list,LOW,
++Vaidya Hospital,private,Panaji,15.4982185,73.8226594,latlong.net Panaji hospitals list,LOW,
++Campal Health Services Pvt Ltd,private,Panaji (Campal),15.4885211,73.8154247,latlong.net Panaji hospitals list,LOW,
++St. Anthony's Hospital and Research Centre,private,Pernem/Mandrem area,15.6005096,73.7503934,latlong.net Panaji hospitals list,LOW,
++Dhumaskar Hospital,private,Pernem/Mapusa area,15.625355,73.85806,latlong.net Panaji hospitals list,LOW,
++Anandi Maternity and Nursing Home,private maternity,Ponda area,15.5152928,73.9608754,latlong.net Panaji hospitals list,LOW,
++Dr. Priyolkar's Surgery Hospital,private,Ponda area,15.446483,73.97056,latlong.net Panaji hospitals list,LOW,
++Raikar Hospital,private,Ponda area,15.514031,73.962391,latlong.net Panaji hospitals list,LOW,
++Saud EMS Hospital,private,Ponda area,15.4943092,73.9374732,latlong.net Panaji hospitals list,LOW,
++RG Stone Urology and Laparoscopy Hospital,private specialty,Porvorim,15.526846,73.8260493,latlong.net Panaji hospitals list,LOW,
++Chodankar Hospital,private,Porvorim area,15.5297062,73.8256407,latlong.net Panaji hospitals list,LOW,
++Dr. Anil D'Silva's Multispeciality Dental Hospital,private dental,Porvorim area,15.533524,73.823814,latlong.net Panaji hospitals list,LOW,
++Dr. Prabhu Hospital,private,Porvorim area,15.5315307,73.8273826,latlong.net Panaji hospitals list,LOW,
++Mandovi Clinic,private clinic,Porvorim area,15.522985,73.826805,latlong.net Panaji hospitals list,LOW,
++Prabhu Hospital,private,Porvorim/Mapusa area,15.54663,73.815301,latlong.net Panaji hospitals list,LOW,
++Mathew Braganza Hospital,private,Saligao area,15.5446823,73.7637688,latlong.net Panaji hospitals list,LOW,
++Shri Ram Hospital,private,Saligao area,15.543917,73.764435,latlong.net Panaji hospitals list,LOW,
++Coral Clinic Systems,private clinic,South Goa,15.369967,73.947903,latlong.net Panaji hospitals list,LOW,
++Dr. M.M. Mesquita Maternity and Eye Hospital,private maternity/eye,Vasco,15.397171,73.81174,latlong.net Panaji hospitals list,LOW,
++INHS Jeevanti (naval hospital),defence,Vasco,15.404702,73.8191,latlong.net Panaji hospitals list,LOW,"Restricted access, probably exclude from the public map"
++Kamat Nursing Home,private nursing home,Vasco,15.398097,73.813721,latlong.net Panaji hospitals list,LOW,
++MPT Hospital,port trust,Vasco,15.4029052,73.7907685,latlong.net Panaji hospitals list,LOW,
++Pai Hospital,private,Vasco,15.3974153,73.8294927,latlong.net Panaji hospitals list,LOW,
++Prakaash Eye Hospital,private eye,Vasco,15.3995724,73.8222011,latlong.net Panaji hospitals list,LOW,
++Sanjeevani Hospital,private,Vasco,15.395281,73.80583,latlong.net Panaji hospitals list,LOW,
++Sri Damodar Hospital,private,Vasco,15.3980773,73.8146925,latlong.net Panaji hospitals list,LOW,
++Vaatsalya Hospital,private,Vasco,15.3959776,73.8094262,latlong.net Panaji hospitals list,LOW,
++Vishwa Sanjeevani Hospital,private,Vasco,15.3943307,73.806358,latlong.net Panaji hospitals list,LOW,
++"Chikitsa Hospital, Verna",private,Verna,15.3762147,73.9270898,latlong.net Panaji hospitals list,LOW,
++Verna Hospital,private,Verna,15.34837,73.934296,latlong.net Panaji hospitals list,LOW,
++Dr. Roque Ferreira's Memorial Hospital,private,Verna/Cuncolim area,15.347941,73.934442,latlong.net Panaji hospitals list,LOW,
++PHC Balli,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,phone 0832-261 0216 (garbled)
++PHC Betki,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2399658
++PHC Cansarvarne,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2205222
++PHC Cansaulim,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2754036
++PHC Chimbel,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2458933
++PHC Chinchinim,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,phone garbled
++PHC Colvale,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2299870
++PHC Corlim,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2285769
++PHC Curtorim,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,phone garbled
++PHC Loutolim,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2777140 / 2858700
++PHC Mayem,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2363024
++PHC Navelim,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,phone garbled
++PHC Pillem-Dharbandora,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2344227
++PHC Ponda,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2319006
++PHC Quepem,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2662636
++PHC Sanguem,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2604013
++PHC Shiroda,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2307073
++PHC Siolim,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,phone garbled
++PHC Cortalim,government PHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,no phone in the PDF
++Urban Health Centre Margao,government UHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2715004
++Urban Health Centre Panaji,government UHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,phone garbled
++Urban Health Centre Vasco,government UHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2572307 / 2500606
++CHC Bicholim,government CHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2350402
++CHC Canacona,government CHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2643422 / 2543339
++CHC Curchorem,government CHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,phone garbled
++CHC Pernem,government CHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,phone garbled
++CHC Sankhali,government CHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2364258
++CHC Valpoi,government CHC,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2375234 / 2374250
++"South Goa District Hospital (Hospicio), Margao",government district,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,"phone garbled; address: Monte Hill, Margao 403601"
++Sub-District Hospital Ponda,government sub-district,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,"address: St Cruz Tisk, Mardangad, Ponda"
++"TB Hospital, Margao",government TB,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,0832-2757777
++"Victor Hospital (Apollo Victor / Rajagiri Victor), Margao",private multispeciality,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,"0832-2728888; Malbhat, near Margao railway station"
++ESI Hospital Margao,government ESI,,,,Goa DHS telephone list (names only) / other official page,NEEDS COORDINATES,"near Dr Rajendra Prasad Stadium, Margao; casualty 0832-2703036"
+diff --git a/src/data/seed/firstRun.ts b/src/data/seed/firstRun.ts
+index 5401cd9..171f4a7 100644
+--- a/src/data/seed/firstRun.ts
++++ b/src/data/seed/firstRun.ts
+@@ -8,6 +8,8 @@ const DEMO_SEEDED = 'demoAccountsSeeded';
+ /** Bump when seedEmergencyCards changes, so devices that already have cards get the new set. */
+ export const KB_VERSION = '5';
+ const KB_VERSION_KEY = 'knowledgeBaseVersion';
++export const HOSPITALS_VERSION = '2';
++const HOSPITALS_VERSION_KEY = 'hospitalsVersion';
+ /** Where accounts lived before Dexie. Read once by the migration below, then removed. */
+ const LEGACY_USERS_KEY = 'medigo.users';
+ 
+@@ -51,11 +53,24 @@ async function syncKnowledgeBase(d: LocalDatabase) {
+   });
+ }
+ 
++/**
++ * Replaces the hospitals list when HOSPITALS_VERSION changes (or on first run). Nothing else stores a hospitalId
++ * (the map reads the table directly), so a replace is safe.
++ */
++async function syncHospitals(d: LocalDatabase) {
++  if ((await d.getMeta(HOSPITALS_VERSION_KEY)) === HOSPITALS_VERSION) return;
++  await d.transaction('rw', d.hospitals, d.meta, async () => {
++    await d.hospitals.clear();
++    await d.hospitals.bulkAdd(seedHospitals);
++    await d.meta.put({ key: HOSPITALS_VERSION_KEY, value: HOSPITALS_VERSION });
++  });
++}
++
+ /** Runs on every start; each step only does work the first time (or when the knowledge base version changes). */
+ export async function runFirstRunJobs(d: LocalDatabase): Promise<void> {
+   // Reference data (shared by all accounts).
+   await syncKnowledgeBase(d);
+-  if ((await d.hospitals.count()) === 0) await d.hospitals.bulkAdd(seedHospitals);
++  await syncHospitals(d);
+ 
+   await migrateLegacyUsers(d);
+ 
+diff --git a/src/data/seed/hospitals.ts b/src/data/seed/hospitals.ts
+index d7e334c..94db121 100644
+--- a/src/data/seed/hospitals.ts
++++ b/src/data/seed/hospitals.ts
+@@ -1,14 +1,95 @@
+ import type { Hospital } from '../../types/Hospital';
+ 
+ /**
+- * SAMPLE DATA, not a verified directory: six Goa facilities used to seed the Dexie `hospitals` table on first run.
+- * Coordinates and addresses are approximate. Replace with the verified dataset later.
++ * DRAFT DATA, not a verified directory. Goa health facilities collected from public pages (latlong.net listings, the
++ * Goa Directorate of Health Services lists and a hospital's own report) on 24 Nov 2026.
++ * - Coordinates are NOT field-checked and can be off by a few hundred metres, or more. Check each one on a map before
++ *   real-world use. Each facility's confidence is in docs/goa_health_facilities_draft.csv.
++ * - Four official facilities with no source coordinates keep a town-level position and say "(approx. location)".
++ * - Phone numbers are only those clean in the official DHS telephone list; the others are left out on purpose, because
++ *   the call button must never dial a wrong number.
++ * Replace with a verified OpenStreetMap extract later.
++ * Bump HOSPITALS_VERSION in firstRun.ts whenever this list changes, so devices reload it.
+  */
+ export const seedHospitals: Hospital[] = [
+-  { hospitalId: 1, name: 'Goa Medical College and Hospital', latitude: 15.4627, longitude: 73.8552, address: 'Bambolim, Goa' },
+-  { hospitalId: 2, name: 'Asilo Hospital', latitude: 15.5909, longitude: 73.8082, address: 'Mapusa, North Goa' },
+-  { hospitalId: 3, name: 'District Hospital (Hospicio)', latitude: 15.28, longitude: 73.957, address: 'Margao, South Goa' },
+-  { hospitalId: 4, name: 'Sub-District Hospital Ponda', latitude: 15.403, longitude: 74.0153, address: 'Ponda, Goa' },
+-  { hospitalId: 5, name: 'Community Health Centre Pernem', latitude: 15.72, longitude: 73.796, address: 'Pernem, North Goa' },
+-  { hospitalId: 6, name: 'Community Health Centre Canacona', latitude: 15.01, longitude: 74.02, address: 'Canacona, South Goa' },
++  { hospitalId: 1, name: 'Asilo Hospital / North Goa District Hospital', latitude: 15.589379, longitude: 73.816574, address: 'Mapusa, Goa' },
++  { hospitalId: 2, name: 'Goa Dental College and Hospital', latitude: 15.4659712, longitude: 73.857501, address: 'Bambolim, Goa' },
++  { hospitalId: 3, name: 'Goa Medical College and Hospital', latitude: 15.4637639, longitude: 73.8584047, address: 'Bambolim, Goa' },
++  { hospitalId: 4, name: 'Institute of Psychiatry and Human Behaviour (IPHB)', latitude: 15.4524044, longitude: 73.8608402, address: 'Bambolim, Goa' },
++  { hospitalId: 5, name: 'PHC Aldona', latitude: 15.5778149, longitude: 73.862684, address: 'Aldona, Goa', phone: '0832-2293257' },
++  { hospitalId: 6, name: 'PHC Candolim', latitude: 15.5149219, longitude: 73.767963, address: 'Candolim, Goa', phone: '0832-2489035' },
++  { hospitalId: 7, name: 'PHC Marcaim', latitude: 15.4221431, longitude: 73.9495915, address: 'Marcaim, Goa' },
++  { hospitalId: 8, name: 'PHC Porvorim', latitude: 15.5266217, longitude: 73.8339586, address: 'Porvorim, Goa' },
++  { hospitalId: 9, name: 'Sub-District Hospital Chicalim (Cottage Hospital)', latitude: 15.400293, longitude: 73.832382, address: 'Chicalim, Goa', phone: '0832-2541698' },
++  { hospitalId: 10, name: 'Super Speciality Block, Goa Medical College', latitude: 15.4622488, longitude: 73.8549807, address: 'Bambolim, Goa' },
++  { hospitalId: 11, name: 'TB and Chest Disease Hospital (Panaji)', latitude: 15.4835919, longitude: 73.8233319, address: 'Panaji, Goa' },
++  { hospitalId: 12, name: 'Urban Health Centre Mapusa', latitude: 15.5898759, longitude: 73.8166404, address: 'Mapusa, Goa', phone: '0832-2262226' },
++  { hospitalId: 13, name: 'District Hospital (Hospicio)', latitude: 15.28, longitude: 73.957, address: 'Margao, South Goa (approx. location)' },
++  { hospitalId: 14, name: 'Sub-District Hospital Ponda', latitude: 15.403, longitude: 74.0153, address: 'Ponda, Goa (approx. location)' },
++  { hospitalId: 15, name: 'Community Health Centre Pernem', latitude: 15.72, longitude: 73.796, address: 'Pernem, North Goa (approx. location)' },
++  { hospitalId: 16, name: 'Community Health Centre Canacona', latitude: 15.01, longitude: 74.02, address: 'Canacona, South Goa (approx. location)' },
++  { hospitalId: 17, name: 'Dharwadkar Nursing Home', latitude: 15.5437234, longitude: 73.7722516, address: 'Anjuna/Dongarpur area, Goa' },
++  { hospitalId: 18, name: 'Dr Caeiro\'s Bicholim Polyclinic', latitude: 15.5882164, longitude: 73.9444055, address: 'Bicholim, Goa' },
++  { hospitalId: 19, name: 'Mahatme Nursing Home', latitude: 15.6072918, longitude: 73.9311242, address: 'Bicholim, Goa' },
++  { hospitalId: 20, name: 'Mardolkar (clinic)', latitude: 15.590947, longitude: 73.948326, address: 'Bicholim, Goa' },
++  { hospitalId: 21, name: 'Subodh Maternity Home', latitude: 15.588492, longitude: 73.94487, address: 'Bicholim, Goa' },
++  { hospitalId: 22, name: 'Dr. Dukle\'s Hospital and Research Centre', latitude: 15.5282905, longitude: 73.7649929, address: 'Calangute/Saligao area, Goa' },
++  { hospitalId: 23, name: 'Bosio Hospital', latitude: 15.5200463, longitude: 73.7707012, address: 'Candolim area, Goa' },
++  { hospitalId: 24, name: 'Salgaocar Medical Research Centre (SMRC)', latitude: 15.3946729, longitude: 73.8363406, address: 'Chicalim, Goa' },
++  { hospitalId: 25, name: 'Adhar Hospital, Collan', latitude: 15.575819, longitude: 73.9797105, address: 'Collem area, Goa' },
++  { hospitalId: 26, name: 'Dr. Dhulapkar\'s Hospital / Sushruti Hospital', latitude: 15.4972642, longitude: 73.9320712, address: 'Corlim/Ponda area, Goa' },
++  { hospitalId: 27, name: 'Manipal Hospital Goa', latitude: 15.460187, longitude: 73.813503, address: 'Dona Paula, Goa' },
++  { hospitalId: 28, name: 'Anthony Gonsalves Hospital', latitude: 15.4686252, longitude: 73.8482933, address: 'Goa Velha/Santa Cruz, Goa' },
++  { hospitalId: 29, name: 'Ankur Hospital (Dr Mopkar)', latitude: 15.592072, longitude: 73.808984, address: 'Mapusa, Goa' },
++  { hospitalId: 30, name: 'Bhagyoday Hospital', latitude: 15.5944141, longitude: 73.8116459, address: 'Mapusa, Goa' },
++  { hospitalId: 31, name: 'Dr. Kolwalkar\'s Galaxy Hospital', latitude: 15.6059423, longitude: 73.8132935, address: 'Mapusa, Goa' },
++  { hospitalId: 32, name: 'Dr. Olavo Ribeiro Hospital', latitude: 15.5915292, longitude: 73.8148437, address: 'Mapusa, Goa' },
++  { hospitalId: 33, name: 'Gauns Child Care Hospital', latitude: 15.599969, longitude: 73.8111929, address: 'Mapusa, Goa' },
++  { hospitalId: 34, name: 'Holy Cross General Remanso Hospital', latitude: 15.5902147, longitude: 73.816286, address: 'Mapusa, Goa' },
++  { hospitalId: 35, name: 'Vision Hospital Emergency Complex', latitude: 15.6049299, longitude: 73.8202808, address: 'Mapusa, Goa' },
++  { hospitalId: 36, name: 'Vision Multispeciality Hospital', latitude: 15.6040397, longitude: 73.8200726, address: 'Mapusa, Goa' },
++  { hospitalId: 37, name: 'Vrundavan Shalby Hospital', latitude: 15.603647, longitude: 73.8241743, address: 'Mapusa, Goa' },
++  { hospitalId: 38, name: 'Jesus, Mary and Joseph (JMJ) Hospital', latitude: 15.5413202, longitude: 73.822747, address: 'Mapusa/Saligao area, Goa' },
++  { hospitalId: 39, name: 'Marwahi Hospital', latitude: 15.5694164, longitude: 73.8066968, address: 'Mapusa/Sangolda, Goa' },
++  { hospitalId: 40, name: 'Chaitanya Mental Health Care Centre', latitude: 15.619176, longitude: 73.839756, address: 'North Goa, Goa' },
++  { hospitalId: 41, name: 'Healthway Hospitals (Old Goa super speciality)', latitude: 15.4856998, longitude: 73.9108806, address: 'Old Goa, Goa' },
++  { hospitalId: 42, name: 'CMM Hospital', latitude: 15.493412, longitude: 73.826491, address: 'Panaji, Goa' },
++  { hospitalId: 43, name: 'Dr. Ajit Kamat Hospital', latitude: 15.487352, longitude: 73.812367, address: 'Panaji, Goa' },
++  { hospitalId: 44, name: 'Dr. Parab\'s Hospital', latitude: 15.477488, longitude: 73.821525, address: 'Panaji, Goa' },
++  { hospitalId: 45, name: 'Dr. Rajadhyaksha Hospital', latitude: 15.5004212, longitude: 73.8287032, address: 'Panaji, Goa' },
++  { hospitalId: 46, name: 'Ghanshyam Govind Kamat Memorial Hospital', latitude: 15.4905205, longitude: 73.8324085, address: 'Panaji, Goa' },
++  { hospitalId: 47, name: 'Healthway Hospital (Fontainhas)', latitude: 15.4908487, longitude: 73.8278326, address: 'Panaji, Goa' },
++  { hospitalId: 48, name: 'Indira Smruti Raikar Nursing Home', latitude: 15.4801333, longitude: 73.8144089, address: 'Panaji, Goa' },
++  { hospitalId: 49, name: 'Kaisare Eye and Dental Hospital', latitude: 15.4905935, longitude: 73.8325607, address: 'Panaji, Goa' },
++  { hospitalId: 50, name: 'Kaisares Hospital', latitude: 15.4903535, longitude: 73.833051, address: 'Panaji, Goa' },
++  { hospitalId: 51, name: 'Noble Super Speciality Eye Hospital', latitude: 15.499722, longitude: 73.822989, address: 'Panaji, Goa' },
++  { hospitalId: 52, name: 'Trinity Health Care and Medical Research', latitude: 15.484842, longitude: 73.8115837, address: 'Panaji, Goa' },
++  { hospitalId: 53, name: 'Vaidya Hospital', latitude: 15.4982185, longitude: 73.8226594, address: 'Panaji, Goa' },
++  { hospitalId: 54, name: 'Campal Health Services Pvt Ltd', latitude: 15.4885211, longitude: 73.8154247, address: 'Panaji, Goa' },
++  { hospitalId: 55, name: 'St. Anthony\'s Hospital and Research Centre', latitude: 15.6005096, longitude: 73.7503934, address: 'Pernem/Mandrem area, Goa' },
++  { hospitalId: 56, name: 'Dhumaskar Hospital', latitude: 15.625355, longitude: 73.85806, address: 'Pernem/Mapusa area, Goa' },
++  { hospitalId: 57, name: 'Anandi Maternity and Nursing Home', latitude: 15.5152928, longitude: 73.9608754, address: 'Ponda area, Goa' },
++  { hospitalId: 58, name: 'Dr. Priyolkar\'s Surgery Hospital', latitude: 15.446483, longitude: 73.97056, address: 'Ponda area, Goa' },
++  { hospitalId: 59, name: 'Raikar Hospital', latitude: 15.514031, longitude: 73.962391, address: 'Ponda area, Goa' },
++  { hospitalId: 60, name: 'Saud EMS Hospital', latitude: 15.4943092, longitude: 73.9374732, address: 'Ponda area, Goa' },
++  { hospitalId: 61, name: 'RG Stone Urology and Laparoscopy Hospital', latitude: 15.526846, longitude: 73.8260493, address: 'Porvorim, Goa' },
++  { hospitalId: 62, name: 'Chodankar Hospital', latitude: 15.5297062, longitude: 73.8256407, address: 'Porvorim area, Goa' },
++  { hospitalId: 63, name: 'Dr. Anil D\'Silva\'s Multispeciality Dental Hospital', latitude: 15.533524, longitude: 73.823814, address: 'Porvorim area, Goa' },
++  { hospitalId: 64, name: 'Dr. Prabhu Hospital', latitude: 15.5315307, longitude: 73.8273826, address: 'Porvorim area, Goa' },
++  { hospitalId: 65, name: 'Mandovi Clinic', latitude: 15.522985, longitude: 73.826805, address: 'Porvorim area, Goa' },
++  { hospitalId: 66, name: 'Prabhu Hospital', latitude: 15.54663, longitude: 73.815301, address: 'Porvorim/Mapusa area, Goa' },
++  { hospitalId: 67, name: 'Mathew Braganza Hospital', latitude: 15.5446823, longitude: 73.7637688, address: 'Saligao area, Goa' },
++  { hospitalId: 68, name: 'Shri Ram Hospital', latitude: 15.543917, longitude: 73.764435, address: 'Saligao area, Goa' },
++  { hospitalId: 69, name: 'Coral Clinic Systems', latitude: 15.369967, longitude: 73.947903, address: 'South Goa, Goa' },
++  { hospitalId: 70, name: 'Dr. M.M. Mesquita Maternity and Eye Hospital', latitude: 15.397171, longitude: 73.81174, address: 'Vasco, Goa' },
++  { hospitalId: 71, name: 'Kamat Nursing Home', latitude: 15.398097, longitude: 73.813721, address: 'Vasco, Goa' },
++  { hospitalId: 72, name: 'Pai Hospital', latitude: 15.3974153, longitude: 73.8294927, address: 'Vasco, Goa' },
++  { hospitalId: 73, name: 'Prakaash Eye Hospital', latitude: 15.3995724, longitude: 73.8222011, address: 'Vasco, Goa' },
++  { hospitalId: 74, name: 'Sanjeevani Hospital', latitude: 15.395281, longitude: 73.80583, address: 'Vasco, Goa' },
++  { hospitalId: 75, name: 'Sri Damodar Hospital', latitude: 15.3980773, longitude: 73.8146925, address: 'Vasco, Goa' },
++  { hospitalId: 76, name: 'Vaatsalya Hospital', latitude: 15.3959776, longitude: 73.8094262, address: 'Vasco, Goa' },
++  { hospitalId: 77, name: 'Vishwa Sanjeevani Hospital', latitude: 15.3943307, longitude: 73.806358, address: 'Vasco, Goa' },
++  { hospitalId: 78, name: 'Chikitsa Hospital, Verna', latitude: 15.3762147, longitude: 73.9270898, address: 'Verna, Goa' },
++  { hospitalId: 79, name: 'Verna Hospital', latitude: 15.34837, longitude: 73.934296, address: 'Verna, Goa' },
++  { hospitalId: 80, name: 'Dr. Roque Ferreira\'s Memorial Hospital', latitude: 15.347941, longitude: 73.934442, address: 'Verna/Cuncolim area, Goa' },
+ ];
+-- 
+2.43.0
+
