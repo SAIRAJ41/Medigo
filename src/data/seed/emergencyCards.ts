@@ -239,7 +239,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
       'Everyone who nearly drowned needs a hospital check, even if they seem well.',
     ].join('\n'),
   },
-  // Source: Indian Red Cross first-aid guidance (bites and stings). Scorpions have their own card (16+).
+  // Source: Indian Red Cross first-aid guidance (bites and stings). Scorpions have their own card (36).
   {
     cardId: 15,
     conditionName: 'Insect sting',
