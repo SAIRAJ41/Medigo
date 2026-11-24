@@ -18,7 +18,7 @@ if (!apiKey || !model) {
 }
 
 const port = Number(read('PORT') || 8787);
-const timeoutMs = Number(read('MODEL_TIMEOUT_MS') || 60_000);
+const timeoutMs = Number(read('MODEL_TIMEOUT_MS') || 90_000);
 
 /** Server settings. The API key is read by ModelClient only and is never logged. */
 export const config = {
@@ -27,6 +27,6 @@ export const config = {
   port: Number.isFinite(port) && port > 0 ? port : 8787,
   allowedOrigin: read('ALLOWED_ORIGIN') || 'http://localhost:5173',
   enableImages: read('ENABLE_IMAGES').toLowerCase() === 'true',
-  // Real replies take 30 to 45 s; the client (ApiClient) waits 70 s, so keep this below that.
-  modelTimeoutMs: Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 60_000,
+  // Real replies take 35 to 60 s, plus busy-model retries. The client (ApiClient) waits 100 s, so keep this below that.
+  modelTimeoutMs: Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 90_000,
 } as const;

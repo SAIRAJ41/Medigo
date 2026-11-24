@@ -10,9 +10,9 @@ import { seedEmergencyCards } from '../../src/data/seed/emergencyCards.ts';
 const TRIAGE_URL = process.env.TRIAGE_URL ?? 'http://localhost:8787/triage';
 const env = dotenv.config({ path: fileURLToPath(new URL('../.env', import.meta.url)) }).parsed ?? {};
 
-// Same rule as server/src/config.ts: a bad or missing value means 60 s. Wait a little longer than the server.
-const serverTimeout = Number(env.MODEL_TIMEOUT_MS || 60_000);
-const CLIENT_TIMEOUT_MS = (Number.isFinite(serverTimeout) && serverTimeout > 0 ? serverTimeout : 60_000) + 15_000;
+// Same rule as server/src/config.ts: a bad or missing value means 90 s. Wait a little longer than the server.
+const serverTimeout = Number(env.MODEL_TIMEOUT_MS || 90_000);
+const CLIENT_TIMEOUT_MS = (Number.isFinite(serverTimeout) && serverTimeout > 0 ? serverTimeout : 90_000) + 15_000;
 const MIN_GAP_MS = 3_500; // at most ~17 requests a minute, under the server's 20/min limit
 const FALLBACK = 'Unable to assess. Please seek medical help'; // ResponseValidator.fallback() condition
 
