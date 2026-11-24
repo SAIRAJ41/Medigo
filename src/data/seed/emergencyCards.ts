@@ -294,7 +294,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 18,
     conditionName: 'Stroke',
-    keywords: ['paralysis', 'paralysed', 'paralyzed', 'numbness', 'slurred', 'slurring', 'drooping', 'lakwa', 'lakva', 'brain'],
+    keywords: ['paralysis', 'paralysed', 'paralyzed', 'numbness', 'numb', 'slurred', 'slurring', 'drooping', 'lakwa', 'lakva', 'brain'],
     severityColor: 'RED',
     severityLevel: 'HIGH',
     seekFacility: true,
@@ -310,7 +310,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 19,
     conditionName: 'Seizure',
-    keywords: ['seizures', 'siezure', 'fits', 'convulsion', 'convulsions', 'epilepsy', 'epileptic', 'jerking', 'mirgi', 'daura'],
+    keywords: ['seizures', 'siezure', 'seizer', 'fits', 'convulsion', 'convulsions', 'epilepsy', 'epileptic', 'jerking', 'mirgi', 'daura'],
     severityColor: 'YELLOW',
     severityLevel: 'HIGH',
     seekFacility: true,
@@ -342,7 +342,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 21,
     conditionName: 'Allergic reaction',
-    keywords: ['allergy', 'anaphylaxis', 'hives', 'rash', 'epipen', 'adrenaline', 'itchy', 'itching', 'urticaria'],
+    keywords: ['allergy', 'allergic', 'anaphylaxis', 'hives', 'rash', 'epipen', 'adrenaline', 'itchy', 'itching', 'urticaria', 'lip', 'lips', 'prawn', 'shellfish', 'seafood', 'khujli'],
     severityColor: 'RED',
     severityLevel: 'HIGH',
     seekFacility: true,
@@ -390,7 +390,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 24,
     conditionName: 'Spinal injury',
-    keywords: ['spine', 'backbone', 'diving', 'dive', 'neck', 'paralysed', 'paralyzed', 'tingling', 'vertebra', 'reedh'],
+    keywords: ['spine', 'backbone', 'diving', 'dive', 'neck', 'paralysed', 'paralyzed', 'tingling', 'numb', 'roof', 'vertebra', 'reedh'],
     severityColor: 'RED',
     severityLevel: 'HIGH',
     seekFacility: true,
@@ -423,7 +423,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 26,
     conditionName: 'Stomach ache',
-    keywords: ['abdomen', 'abdominal', 'belly', 'tummy', 'stomachache', 'appendix', 'appendicitis', 'colic', 'gastric', 'acidity'],
+    keywords: ['abdomen', 'abdominal', 'belly', 'tummy', 'stomachache', 'appendix', 'appendicitis', 'colic', 'gastric', 'acidity', 'pet', 'pait'],
     severityColor: 'YELLOW',
     severityLevel: 'MEDIUM',
     seekFacility: true,
@@ -519,7 +519,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 32,
     conditionName: 'Pregnancy emergency',
-    keywords: ['pregnant', 'pregnent', 'labour', 'labor', 'contractions', 'delivery', 'miscarriage', 'garbhvati', 'prasav', 'trimester'],
+    keywords: ['pregnant', 'pregnent', 'labour', 'labor', 'contractions', 'delivery', 'miscarriage', 'garbhvati', 'prasav', 'trimester', 'bleeding', 'vaginal', 'spotting'],
     severityColor: 'RED',
     severityLevel: 'HIGH',
     seekFacility: true,
@@ -536,7 +536,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 33,
     conditionName: 'Hypoglycaemia',
-    keywords: ['hypoglycemia', 'hypo', 'diabetic', 'diabetes', 'insulin', 'glucose', 'madhumeh'],
+    keywords: ['hypoglycemia', 'hypo', 'diabetic', 'diabetes', 'insulin', 'glucose', 'madhumeh', 'sweating', 'shaky'],
     severityColor: 'YELLOW',
     severityLevel: 'MEDIUM',
     seekFacility: false,
@@ -568,7 +568,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 35,
     conditionName: 'Suffocation',
-    keywords: ['suffocate', 'suffocating', 'smothered', 'strangled', 'strangulation', 'noose', 'smoke', 'charcoal', 'monoxide', 'ghutan'],
+    keywords: ['suffocate', 'suffocating', 'smothered', 'strangled', 'strangulation', 'noose', 'smoke', 'charcoal', 'monoxide', 'ghutan', 'plastic', 'polythene'],
     severityColor: 'RED',
     severityLevel: 'HIGH',
     seekFacility: true,

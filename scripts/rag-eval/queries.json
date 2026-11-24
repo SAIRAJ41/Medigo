@@ -124,6 +124,10 @@
   {"q": "my grandfather passed away last year", "reject": ["Fainting"], "regression": true, "note": "'passed' removed from Fainting"},
   {"q": "swelling on my face", "reject": ["Fracture or sprain"], "regression": true, "note": "'swelling' removed from Fracture"},
   {"q": "sar dard ho raha hai", "reject": ["Head injury"], "regression": true, "note": "headache is not a head injury; 'sar' removed"},
+  {"q": "my father suddenly fell down and is not breathing", "reject": ["Stroke"], "regression": true, "note": "'suddenly' must not be a Stroke keyword"},
+  {"q": "diabetic and sweating a lot", "expect": ["Hypoglycaemia"], "first": true, "regression": true},
+  {"q": "chest pain and sweating", "expect": ["Heart attack"], "first": true, "regression": true, "note": "'sweating' now also on Hypoglycaemia"},
+  {"q": "deep cut on my hand, bleeding", "expect": ["Severe bleeding"], "first": true, "regression": true, "note": "'bleeding' now also on Pregnancy"},
 
   { "q": "------ held-out: written before tuning, never tuned on ------", "expect": ["*"], "note": "section marker, skipped" },
   {"q": "my brother fell down unconscious and isnt breathing", "expect": ["Cardiac arrest", "Fainting"], "heldout": true},

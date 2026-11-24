@@ -6,7 +6,7 @@ import { seedHospitals } from './hospitals';
 
 const DEMO_SEEDED = 'demoAccountsSeeded';
 /** Bump when seedEmergencyCards changes, so devices that already have cards get the new set. */
-export const KB_VERSION = '3';
+export const KB_VERSION = '4';
 const KB_VERSION_KEY = 'knowledgeBaseVersion';
 /** Where accounts lived before Dexie. Read once by the migration below, then removed. */
 const LEGACY_USERS_KEY = 'medigo.users';
