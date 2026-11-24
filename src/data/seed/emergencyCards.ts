@@ -1,7 +1,7 @@
 import type { EmergencyCard } from '../../types/EmergencyCard';
 
 /**
- * Seed knowledge base: 40 common first-aid conditions for rural India, one entry per condition (SPEC section 7).
+ * Seed knowledge base: 41 common first-aid conditions for rural India, one entry per condition (SPEC section 7).
  * Copied into the Dexie `emergencyCards` table on first run, and re-copied when KB_VERSION in firstRun.ts changes.
  * severityGuidance holds the first-aid steps, one step per line. keywords are extra words people use (offline matching).
  * severityColor / severityLevel / seekFacility are only the default rating for the condition (offline replies, sample history);
@@ -58,6 +58,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
     severityLevel: 'HIGH',
     seekFacility: true,
     severityGuidance: [
+      'These steps are for adults and children over 1 year. For a baby under 1 year, use the Choking in a baby steps.',
       'If the person can cough or speak, encourage them to keep coughing.',
       'If they cannot breathe or speak, call 112 or ask someone to call.',
       'Give up to 5 firm back blows between the shoulder blades.',
@@ -285,8 +286,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
     severityGuidance: [
       'Call 112 at once. Chest pain, pressure or heaviness lasting more than a few minutes may be a heart attack.',
       'Help the person sit down and rest, half-sitting with knees bent is often easiest. Loosen tight clothing.',
-      'If they have a heart tablet or spray prescribed by a doctor, help them take it.',
-      'If they are an adult, awake, not allergic and have no bleeding problem, give one aspirin (300 mg) to chew slowly.',
+      'If a doctor has prescribed a heart tablet or spray, help them use it as prescribed.',
       'Stay with them. If they become unresponsive and stop breathing normally, start CPR.',
     ].join('\n'),
   },
@@ -332,17 +332,17 @@ export const seedEmergencyCards: EmergencyCard[] = [
     seekFacility: true,
     severityGuidance: [
       'Help the person sit upright, leaning slightly forward. Stay calm and loosen tight clothing.',
-      'Help them use their reliever inhaler (usually blue): 1 puff every 30 to 60 seconds, up to 10 puffs, with a spacer if they have one.',
+      'Help them use their own reliever inhaler as prescribed, with a spacer if they have one.',
       'Move them away from smoke, dust, or whatever started the attack.',
       'Call 112 if they cannot speak full sentences, their lips turn blue, they get drowsy, or the inhaler does not help.',
-      'While waiting, keep giving puffs as above. Start CPR if they stop breathing normally.',
+      'While waiting, keep helping them use the inhaler as prescribed. Start CPR if they stop breathing normally.',
     ].join('\n'),
   },
   // Source: WHO anaphylaxis guidance; Indian Red Cross first-aid guidance (severe allergic reaction).
   {
     cardId: 21,
     conditionName: 'Allergic reaction',
-    keywords: ['allergy', 'allergic', 'anaphylaxis', 'hives', 'rash', 'epipen', 'adrenaline', 'itchy', 'itching', 'urticaria', 'lip', 'lips', 'prawn', 'shellfish', 'seafood', 'khujli'],
+    keywords: ['allergy', 'allergic', 'anaphylaxis', 'hives', 'rash', 'epipen', 'adrenaline', 'itchy', 'itching', 'urticaria', 'prawn', 'shellfish', 'seafood', 'khujli'],
     severityColor: 'RED',
     severityLevel: 'HIGH',
     seekFacility: true,
@@ -390,7 +390,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 24,
     conditionName: 'Spinal injury',
-    keywords: ['spine', 'backbone', 'diving', 'dive', 'neck', 'paralysed', 'paralyzed', 'tingling', 'numb', 'roof', 'vertebra', 'reedh'],
+    keywords: ['spine', 'backbone', 'diving', 'dive', 'neck', 'paralysed', 'paralyzed', 'tingling', 'numb', 'vertebra', 'reedh'],
     severityColor: 'RED',
     severityLevel: 'HIGH',
     seekFacility: true,
@@ -568,7 +568,7 @@ export const seedEmergencyCards: EmergencyCard[] = [
   {
     cardId: 35,
     conditionName: 'Suffocation',
-    keywords: ['suffocate', 'suffocating', 'smothered', 'strangled', 'strangulation', 'noose', 'smoke', 'charcoal', 'monoxide', 'ghutan', 'plastic', 'polythene'],
+    keywords: ['suffocate', 'suffocating', 'smothered', 'strangled', 'strangulation', 'noose', 'smoke', 'charcoal', 'monoxide', 'ghutan', 'polythene'],
     severityColor: 'RED',
     severityLevel: 'HIGH',
     seekFacility: true,
@@ -658,6 +658,23 @@ export const seedEmergencyCards: EmergencyCard[] = [
       'Keep feeding often. Breastfeed more often to prevent dehydration.',
       'Dress the baby in light clothes. Do not wrap tightly or sponge with cold water.',
       'Give fever medicine only in the dose a doctor or the label gives for the baby\'s age and weight. Never give aspirin to children.',
+    ].join('\n'),
+  },
+  // Source: Indian Red Cross first-aid guidance (choking in infants); Indian Academy of Pediatrics basic life support guidance.
+  {
+    cardId: 41,
+    conditionName: 'Choking in a baby',
+    keywords: ['baby', 'babies', 'infant', 'infants', 'newborn', 'choking', 'choke', 'choked', 'swallowed', 'throat'],
+    severityColor: 'RED',
+    severityLevel: 'HIGH',
+    seekFacility: true,
+    severityGuidance: [
+      'If a baby under 1 year cannot cry, cough or breathe, call 112 or ask someone to call, and start at once.',
+      'Lay the baby face down along your forearm, head lower than the chest, holding the jaw. Give up to 5 firm back blows between the shoulder blades with the heel of your hand.',
+      'If it is still stuck, turn the baby face up with the head low. Give up to 5 chest thrusts with two fingers on the breastbone, just below the nipple line.',
+      'Keep repeating 5 back blows and 5 chest thrusts until the object comes out or the baby cries or breathes.',
+      'Never give abdominal thrusts to a baby. Never sweep a finger blindly in the mouth; take out an object only if you can clearly see it.',
+      'If the baby becomes unresponsive, start infant CPR if you are trained. Even if the object comes out, the baby needs a medical check.',
     ].join('\n'),
   },
 ];

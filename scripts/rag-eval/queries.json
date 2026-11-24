@@ -5,7 +5,7 @@
   { "q": "deep cut on my leg, blood will not stop", "expect": ["Severe bleeding"] },
   { "q": "a nail went into his foot and it is bleeding a lot", "expect": ["Severe bleeding"] },
   { "q": "paper cut on my finger", "expect": ["Minor cut or scrape", "Severe bleeding"], "note": "minor; v2: Minor cut card now exists" },
-  { "q": "my baby is choking on a peanut", "expect": ["Choking"] },
+  { "q": "my baby is choking on a peanut", "expect": ["Choking in a baby"], "note": "v5: baby card added (was Choking)" },
   { "q": "food stuck in throat and he cannot breathe", "expect": ["Choking"] },
   { "q": "fell from the stairs and my ankle is swollen", "expect": ["Fracture or sprain"] },
   { "q": "I think my wrist is broken after a fall", "expect": ["Fracture or sprain"] },
@@ -113,6 +113,9 @@
   { "q": "the cricket match was a thriller", "expect": [], "note": "non-medical" },
   { "q": "I want to buy sugar and rice", "expect": [], "note": "non-medical" },
   { "q": "remind me to call my mother", "expect": [], "note": "non-medical" },
+  { "q": "my roof is leaking", "expect": [], "note": "non-medical; roof removed from Spinal injury" },
+  { "q": "my lip balm is finished", "expect": [], "note": "non-medical; lip removed from Allergic reaction" },
+  { "q": "plastic bag for groceries", "expect": [], "note": "non-medical; plastic removed from Suffocation" },
 
   { "q": "------ regression checks: generic words must not pull in these cards ------", "expect": ["*"], "note": "section marker, skipped" },
   {"q": "I feel a bit dizzy", "expect": ["Fainting"], "reject": ["Snakebite"], "regression": true},
@@ -128,6 +131,11 @@
   {"q": "diabetic and sweating a lot", "expect": ["Hypoglycaemia"], "first": true, "regression": true},
   {"q": "chest pain and sweating", "expect": ["Heart attack"], "first": true, "regression": true, "note": "'sweating' now also on Hypoglycaemia"},
   {"q": "deep cut on my hand, bleeding", "expect": ["Severe bleeding"], "first": true, "regression": true, "note": "'bleeding' now also on Pregnancy"},
+  {"q": "my baby is choking on a peanut", "expect": ["Choking in a baby"], "first": true, "regression": true},
+  {"q": "baby swallowed a coin and is coughing", "expect": ["Choking in a baby", "Choking"], "first": true, "reject": [], "regression": true, "note": "must not rank Fever in a baby first"},
+  {"q": "my son is choking on food", "expect": ["Choking"], "first": true, "regression": true, "note": "adult/child card for non-babies"},
+  {"q": "my baby is vomiting", "expect": ["Vomiting"], "first": true, "regression": true, "note": "age word must not outrank the symptom"},
+  {"q": "my baby has fever", "expect": ["Fever in a baby"], "first": true, "regression": true},
 
   { "q": "------ held-out: written before tuning, never tuned on ------", "expect": ["*"], "note": "section marker, skipped" },
   {"q": "my brother fell down unconscious and isnt breathing", "expect": ["Cardiac arrest", "Fainting"], "heldout": true},
@@ -139,5 +147,5 @@
   {"q": "he is very hot to touch and talking nonsense", "expect": ["Fever", "Heat stroke"], "heldout": true, "note": "vague"},
   {"q": "saap ne dasa", "expect": ["Snakebite"], "heldout": true, "note": "Hinglish, other spelling"},
   {"q": "stung by bichu on hand", "expect": ["Scorpion sting"], "heldout": true, "note": "Hinglish mix"},
-  {"q": "baby swallowed a coin and is coughing", "expect": ["Choking"], "heldout": true}
+  {"q": "baby swallowed a coin and is coughing", "expect": ["Choking in a baby", "Choking"], "heldout": true, "note": "v5: label widened for the new baby card"}
 ]

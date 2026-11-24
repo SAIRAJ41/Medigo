@@ -23,6 +23,9 @@ const tokenize = (text: string): string[] =>
 
 const NAME_WEIGHT = 3; // a word in the condition name is the strongest signal
 const KEYWORD_WEIGHT = 2;
+/** Age words only narrow a match ("my baby is vomiting" is Vomiting, not a baby card), so they count less. Stemmed. */
+const AGE_WORDS = new Set(['baby', 'babi', 'infant', 'newborn', 'neonate']);
+const AGE_WEIGHT = 1;
 /** Below this the match is too weak (e.g. only a common word) and nothing is returned. */
 const MIN_SCORE = 1.5;
 
@@ -52,6 +55,7 @@ export class RagService {
       const terms = new Map<string, number>();
       for (const t of tokenize((card.keywords ?? []).join(' '))) terms.set(t, KEYWORD_WEIGHT);
       for (const t of tokenize(card.conditionName)) terms.set(t, NAME_WEIGHT); // name wins over keyword
+      for (const t of terms.keys()) if (AGE_WORDS.has(t)) terms.set(t, AGE_WEIGHT);
       return { card, terms };
     });
 
